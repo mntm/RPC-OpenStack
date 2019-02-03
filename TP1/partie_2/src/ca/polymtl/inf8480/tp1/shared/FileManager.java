@@ -135,4 +135,12 @@ public class FileManager {
         File f = new File(fileName);
         return f.exists();
     }
+
+    public boolean deleteFile(String filename) throws IOException {
+        return Files.deleteIfExists(Paths.get(this.dirName + filename));
+    }
+
+    public int lineNumber(String filename) throws IOException {
+        return (int) Files.lines(Paths.get(this.dirName + filename)).count();
+    }
 }

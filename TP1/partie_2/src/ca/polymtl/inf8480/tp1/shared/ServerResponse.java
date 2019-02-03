@@ -11,7 +11,7 @@ import java.io.Serializable;
  * @param <T>
  */
 public class ServerResponse<T> implements Serializable {
-    private boolean isSuccessful;
+    private boolean isSuccessful = true;
     private String errorMessage = null;
     private T data = null;
 
