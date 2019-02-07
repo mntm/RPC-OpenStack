@@ -1,8 +1,6 @@
 package ca.polymtl.inf8480.tp1.client;
-import ca.polymtl.inf8480.tp1.shared.*;
 
-import ca.polymtl.inf8480.tp1.shared.FileManager;
-import ca.polymtl.inf8480.tp1.shared.ServerInterface;
+import ca.polymtl.inf8480.tp1.shared.*;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -13,7 +11,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.*;
+import java.util.List;
+import java.util.Scanner;
 
 public class Client implements Runnable {
 
@@ -68,7 +67,7 @@ public class Client implements Runnable {
         System.out.println("    send -s \"<subject>\" <emailAdress> <Content>");
         System.out.println("    read");
         System.out.println("    delete");
-		System.out.println("    list -ur");
+        System.out.println("    list [-ur]");
 		System.out.println("    search <word>");
         System.out.println("    lock-group-list");
         System.out.println("    create-group <groupName> --descr <groupDescription>");
@@ -121,24 +120,18 @@ public class Client implements Runnable {
                         Client.printUsage("The `read` command requires 0 argument. type help for more infos");
                         return;
                     }
-					String idRead = args[1];
-//                    this.read(idRead);
+                    this.read();
                     break;
                 case "delete":
 					if (args.length > 1) {
                         Client.printUsage("The `delete` command requires 0 or 1 argument. type help for more infos");
                         return;
                     }
-					String idDelete = args[1];
-//                    this.delete(idDelete);
+                    this.delete();
                     break;
 				case "list":
-					if (args.length > 1) {
-                        Client.printUsage("The `list` command requires 0 or 1 argument. type help for more infos");
-                        return;
-                    }
-					String justUnread = args[1];
-//                    this.list(justUnread);
+                    boolean unread = ((args.length > 1) && (args[1].equals("-ur")));
+                    this.list(unread);
                     break;
                 case "search":
 					if (args.length < 2) {
@@ -263,21 +256,44 @@ public class Client implements Runnable {
 
 
     public void read() throws RemoteException {
-        /*ServerResponse response = localServerStub.readMail(id, token);
-        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
-        else{
-            
-        }*/
+        ServerResponse<List<EmailMetadata>> list = localServerStub.listMails(false, token);
+        if (!list.isSuccessful()) {
+            System.err.println(list.getErrorMessage());
+            return;
+        }
+
+        int i = this.printEmailList(list.getData(), true);
+
+        int id = this.getLineNumber("Lire le courrier numero: ", i);
+
+
+        ServerResponse<String> rm = localServerStub.readMail(list.getData().get(id - 1), token);
+        if (!rm.isSuccessful()) {
+            System.err.println(list.getErrorMessage());
+            return;
+        }
+
+        String data = rm.getData();
+        System.out.println("\n" + data);
     }
 
 
     public void delete() throws RemoteException {
-        /*EmailMetaData listEmail = list();
-        ServerResponse response = localServerStub.deleteMail(id, token);
-        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
-        else{
-            
-        }*/
+        ServerResponse<List<EmailMetadata>> list = localServerStub.listMails(false, token);
+        if (!list.isSuccessful()) {
+            System.err.println(list.getErrorMessage());
+            return;
+        }
+
+        int i = this.printEmailList(list.getData(), true);
+
+        int id = this.getLineNumber("Supprimer le courrier numero: ", i);
+
+
+        ServerResponse<String> rm = localServerStub.deleteMail(list.getData().get(id - 1), token);
+        if (!rm.isSuccessful()) {
+            System.err.println(list.getErrorMessage());
+        }
     }
 
 
@@ -285,10 +301,7 @@ public class Client implements Runnable {
         ServerResponse response = localServerStub.searchMail(keywords, token);
         if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
         else{
-            ArrayList<EmailMetadata> listEmail = (ArrayList<EmailMetadata>)response.getData();
-            for(int i = 0; i < listEmail.size(); i++){
-                System.out.println(listEmail.get(i).toString());
-            }
+            this.printEmailList((List<EmailMetadata>) response.getData(), false);
         }
     }
 	
@@ -296,7 +309,7 @@ public class Client implements Runnable {
         ServerResponse response = localServerStub.listMails(justUnread, token);
         if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
         else{
-            
+            printEmailList((List<EmailMetadata>) response.getData(), false);
         }
     }
 
@@ -332,5 +345,39 @@ public class Client implements Runnable {
         else{
             
         }
+    }
+
+    private int printEmailList(List<EmailMetadata> list, boolean ret) {
+        int index = 1;
+        int nr = 0;
+        StringBuilder sb = new StringBuilder();
+        for (EmailMetadata data : list) {
+            if (ret) sb.append(index).append("\t");
+            sb.append((data.isRead()) ? "-" : "N").append("\t");
+            sb.append(data.getFrom()).append("\t");
+            sb.append(data.getDate()).append("\t");
+            sb.append(data.getSubject()).append("\n");
+            index++;
+            if (!data.isRead()) nr++;
+        }
+
+        System.out.println(index - 1 + "courriers dont " + nr + "non-lus.");
+        System.out.println(sb.toString());
+
+        return index;
+    }
+
+
+    private int getLineNumber(String message, int up) {
+        System.out.print("\n" + message);
+        Scanner scanner = new Scanner(System.in);
+        int ret = -1;
+        try {
+            ret = scanner.nextInt();
+            if (ret < 0 || ret > up) ret = getLineNumber(message, up);
+        } catch (Exception e) {
+            ret = getLineNumber(message, up);
+        }
+        return ret;
     }
 }

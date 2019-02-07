@@ -62,8 +62,7 @@ public class Server implements ServerInterface {
     private void writeLoginFiles() {
         // <login>:<password>
 
-        try (BufferedWriter bw = this.serverFileManager.newBufferedWriter
-                (LOGIN_FILE, StandardOpenOption.TRUNCATE_EXISTING)) {
+        try (BufferedWriter bw = this.serverFileManager.newBufferedWriter(LOGIN_FILE)) {
             this.logins.forEach((k, v) -> {
                 StringBuilder sb = new StringBuilder();
                 sb.append(k).append(":").append(v);
@@ -102,8 +101,7 @@ public class Server implements ServerInterface {
     private synchronized void writeGroupFiles() {
         // <nom_du_groupe>:user1,user2,user3
 
-        try (BufferedWriter bw = this.serverFileManager.newBufferedWriter
-                (GROUP_FILE, StandardOpenOption.TRUNCATE_EXISTING)) {
+        try (BufferedWriter bw = this.serverFileManager.newBufferedWriter(GROUP_FILE)) {
             this.groups.forEach((String k, Group v) -> {
                 try {
                     bw.write(v.toString());
@@ -159,7 +157,7 @@ public class Server implements ServerInterface {
                         token = entry.getKey();
                 }
             } else {
-                token = this.generateToken();
+                token = this.generateToken(login);
                 this.users.put(token, login);
             }
             response.setSuccessful(true);
@@ -212,8 +210,7 @@ public class Server implements ServerInterface {
             return response;
         }
 
-        try (BufferedWriter bw = this.serverFileManager.newBufferedWriter(
-                GROUP_LOCK, StandardOpenOption.TRUNCATE_EXISTING)) {
+        try (BufferedWriter bw = this.serverFileManager.newBufferedWriter(GROUP_LOCK)) {
             bw.write(this.users.get(token));
         } catch (IOException e) {
             e.printStackTrace();
@@ -277,7 +274,7 @@ public class Server implements ServerInterface {
             return response;
         }
 
-        boolean to_user = this.logins.containsValue(to);
+        boolean to_user = this.logins.containsKey(to);
         boolean to_group = this.groups.containsKey(to);
 
         String sender = this.users.get(token);
@@ -328,6 +325,12 @@ public class Server implements ServerInterface {
         String user = this.users.get(token);
         FileManager fm = new FileManager(SERVER_DIR_NAME + user);
 
+        if (!fm.isReadable(EMAIL_META_FILE)) {
+            response.setSuccessful(false);
+            response.setErrorMessage("Boite aux lettres vide.");
+            return response;
+        }
+
         List<EmailMetadata> datas = new ArrayList<>();
 
         try (BufferedReader br = fm.newBufferedReader(EMAIL_META_FILE)) {
@@ -345,6 +348,12 @@ public class Server implements ServerInterface {
             response.setSuccessful(false);
             response.setErrorMessage("Une erreur s'est produite lors de la collection de la liste de vos courriels.\n" +
                     "Veuillez contacter une personne competente.");
+        }
+
+
+        if (datas.size() == 0) {
+            response.setSuccessful(false);
+            response.setErrorMessage("Boite aux lettres vide.");
         }
 
         return response;
@@ -461,12 +470,13 @@ public class Server implements ServerInterface {
     }
 
 
-    private String generateToken() {
+    private String generateToken(String str) {
 
         StringBuilder sb = new StringBuilder();
+        Random rand = new Random((int) (Math.random() * 100000) * str.hashCode());
         int count = 16;
         while (count-- != 0) {
-            int character = (int) (Math.random() * ALPHA_NUMERIC_STRING.length());
+            int character = (int) (Math.abs(rand.nextInt()) % ALPHA_NUMERIC_STRING.length());
             sb.append(ALPHA_NUMERIC_STRING.charAt(character));
 
         }
@@ -479,7 +489,7 @@ public class Server implements ServerInterface {
         EmailMetadata email = new EmailMetadata(from, subj, Date.from(Instant.now()).toString());
 
         StringBuilder sb = new StringBuilder();
-        sb.append(from).append('_').append(this.generateToken());
+        sb.append(from).append('_').append(this.generateToken("email"));
 
         try (BufferedWriter br = fm.newBufferedWriter(sb.toString())) {
             br.write(content);
@@ -491,7 +501,8 @@ public class Server implements ServerInterface {
 
         email.setContentPath(sb.toString());
 
-        try (BufferedWriter br = fm.newBufferedWriter(EMAIL_META_FILE)) {
+        try (BufferedWriter br = fm.newBufferedWriter(EMAIL_META_FILE, StandardOpenOption.APPEND,
+                StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
             br.write(email.toString());
             br.newLine();
         } catch (IOException e) {
@@ -521,7 +532,7 @@ public class Server implements ServerInterface {
 
     private void writeMetadata(HashMap<String, EmailMetadata> metas, String user) throws IOException {
         FileManager fm = new FileManager(SERVER_DIR_NAME + user);
-        BufferedWriter bw = fm.newBufferedWriter(EMAIL_META_FILE, StandardOpenOption.TRUNCATE_EXISTING);
+        BufferedWriter bw = fm.newBufferedWriter(EMAIL_META_FILE);
 
         for (EmailMetadata meta : metas.values()) {
             bw.write(meta.toString());

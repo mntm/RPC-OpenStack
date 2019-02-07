@@ -21,6 +21,16 @@ public class Group implements Serializable {
         this.members.add(m);
     }
 
+    public static Group fromString(String definition) {
+        String[] split = definition.split(":");
+        Group g = new Group(split[0]);
+
+        for (String user : split[1].split(",")) {
+            g.addMember(user);
+        }
+        return g;
+    }
+
     public List<String> getMembers() {
         return this.members;
     }

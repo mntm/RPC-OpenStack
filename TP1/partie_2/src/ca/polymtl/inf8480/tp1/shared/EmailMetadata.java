@@ -20,12 +20,12 @@ public class EmailMetadata implements Serializable {
 
         String[] fields = definition.split(",");
         EmailMetadata ret = new EmailMetadata(
+                fields[0].split("=")[1],
                 fields[1].split("=")[1],
-                fields[2].split("=")[1],
-                fields[3].split("=")[1]
+                fields[2].split("=")[1]
         );
-        ret.setContentPath(fields[4].split("=")[1]);
-        ret.setRead(fields[5].split("=")[1].equals("-"));
+        ret.setContentPath(fields[3].split("=")[1]);
+        ret.setRead(fields[4].split("=")[1].equals("-"));
 
         return ret;
     }
