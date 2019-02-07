@@ -60,12 +60,15 @@ public class Client implements Runnable {
     private static void printUsage(final String msg) {
         System.out.println(msg);
         System.out.println("USAGE:");
-        System.out.println("    send <filename>");
-        System.out.println("    list");
-        System.out.println("    syncLocalDirectory");
-        System.out.println("    get <filename>");
-        System.out.println("    lock <filename>");
-        System.out.println("    push <filename>");
+        System.out.println("    send -s \"<subject>\" <emailAdress> <Content>");
+        System.out.println("    read <idEmail>");
+        System.out.println("    delete <idEmail>");
+		System.out.println("    list <Bool>");
+		System.out.println("    search <word>");
+        System.out.println("    lock-group-list");
+        System.out.println("    create-group <groupName> --descr <groupDescription>");
+        System.out.println("    join-group <groupName> -u <userName>");
+		System.out.println("    publish-group-list");
     }
 
     public void set(final String[] args) {
@@ -86,37 +89,83 @@ public class Client implements Runnable {
         try {
             switch (args[0]) {
                 case "send":
-                    if (args.length != 2) {
-                        Client.printUsage("The `send` command requires 2 argument.");
+                    if (args.length < 4) {
+                        Client.printUsage("The `send` command requires 4 argument. type help for more infos");
                         return;
                     }
-//                    this.send();
+					String subject = args[2];
+					String addrDest = args[3];
+					String content = args[4];
+//                    this.send(subject, addrDest, content);
                     break;
                 case "read":
-//                    this.read();
+					if (args.length > 1) {
+                        Client.printUsage("The `read` command requires 0 or 1 argument. type help for more infos");
+                        return;
+                    }
+					String id = args[1];
+//                    this.read(id);
                     break;
                 case "delete":
-//                    this.delete();
+					if (args.length > 1) {
+                        Client.printUsage("The `delete` command requires 0 or 1 argument. type help for more infos");
+                        return;
+                    }
+					String id = args[1];
+//                    this.delete(id);
+                    break;
+				case "list":
+					if (args.length > 1) {
+                        Client.printUsage("The `delete` command requires 0 or 1 argument. type help for more infos");
+                        return;
+                    }
+					Bool justUnread = args[1];
+//                    this.list(justUnread);
                     break;
                 case "search":
-//                    this.search();
+					if (args.length != 1) {
+                        Client.printUsage("The `search` command requires 1 argument. type help for more infos");
+                        return;
+                    }
+					string keywords = args[1];
+//                    this.search(keywords);
                     break;
                 case "create-group":
-//                    this.createGroup();
+					if (args.length != 3) {
+                        Client.printUsage("The `create-group` command requires 1 argument. type help for more infos");
+                        return;
+                    }
+					String groupName = args[1];
+					String groupDescr = args[3];
+//                    this.createGroup(groupName, groupDescr);
                     break;
                 case "join-group":
-//                    this.joinGroup();
+					if (args.length != 3) {
+                        Client.printUsage("The `join-group` command requires 1 argument. type help for more infos");
+                        return;
+                    }
+					String groupName = args[1];
+					String userName = args[3];
+//                    this.joinGroup(groupName, userName);
                     break;
                 case "publish-group-list":
-                    this.publishGroupList();
+					if (args.length > 0) {
+                        Client.printUsage("The `publish-group-list` command requires 0 argument. type help for more infos");
+                        return;
+                    }
+//                    this.publishGroupList();
                     break;
 
                 case "lock-group-list":
-                    this.lockGroupList();
+				if (args.length > 0) {
+                        Client.printUsage("The `lock-group-list` command requires 0 argument. type help for more infos");
+                        return;
+                    }
+//                   this.lockGroupList();
                     break;
 
                 case "help":
-                    Client.printUsage("Invalid command");
+                    Client.printUsage("help");
                     break;
                 default:
                     Client.printUsage("Invalid command");
@@ -167,7 +216,7 @@ public class Client implements Runnable {
         return md5;
     }
 
-    public void send(String to, String subject, String content) {
+    public void send(String subject, String addrDest, String content) {
         //localServerStub.sendEmail(to, subject, content);
     }
 
@@ -182,19 +231,22 @@ public class Client implements Runnable {
     }
 
 
-    public void search(String[] kwds) {
+    public void search(String keywords) {
         //localServerStub.searchMail(kwds);
     }
+	
+	public void list(Bool justUnread) {
+        //localServerStub.list(justUnread);
+    }
 
-
-    public void createGroup(String grpName) {
-        Group group = new Group(grpName);
+    public void createGroup(String groupName) {
+        Group group = new Group(groupName);
         groups.add(group);
     }
 
 
-    public void joinGroup(String grpName, String user) {
-        Group group = new Group(grpName);
+    public void joinGroup(String groupName, String user) {
+        Group group = new Group(groupName);
         group.addMember(user);
         groups.add(group);
     }
