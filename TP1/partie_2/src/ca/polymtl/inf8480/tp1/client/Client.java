@@ -22,6 +22,7 @@ public class Client implements Runnable {
     private FileManager clientFileManager = new FileManager("client_files");
     private List<Group> groups = null;
     private String[] args = null;
+    private String token = null;
 
     public Client() {
         if (System.getSecurityManager() == null) {
@@ -32,7 +33,6 @@ public class Client implements Runnable {
             //{{ Initializes connection to the auth server and the file server
             this.localServerStub = (ServerInterface) loadServerStub("127.0.0.1", "server");
             //}}
-            //groups = localServerStub.getGroupList();
         } catch (Exception e) {
         }
 
@@ -60,10 +60,11 @@ public class Client implements Runnable {
     private static void printUsage(final String msg) {
         System.out.println(msg);
         System.out.println("USAGE:");
+        System.out.println("    opensession -u <UserName> -p <Password>");
         System.out.println("    send -s \"<subject>\" <emailAdress> <Content>");
         System.out.println("    read <idEmail>");
         System.out.println("    delete <idEmail>");
-		System.out.println("    list <Bool>");
+		System.out.println("    list -ur");
 		System.out.println("    search <word>");
         System.out.println("    lock-group-list");
         System.out.println("    create-group <groupName> --descr <groupDescription>");
@@ -88,6 +89,15 @@ public class Client implements Runnable {
     private void run(final String[] args) {
         try {
             switch (args[0]) {
+                case "opensession":
+                    if (args.length < 4) {
+                        Client.printUsage("The `send` command requires 4 argument. type help for more infos");
+                        return;
+                    }
+                    String userName = args[2];
+                    String password = args[4];
+                    this.opensession(userName,password);
+                    break;
                 case "send":
                     if (args.length < 4) {
                         Client.printUsage("The `send` command requires 4 argument. type help for more infos");
@@ -103,23 +113,23 @@ public class Client implements Runnable {
                         Client.printUsage("The `read` command requires 0 or 1 argument. type help for more infos");
                         return;
                     }
-					String id = args[1];
-//                    this.read(id);
+					String idRead = args[1];
+//                    this.read(idRead);
                     break;
                 case "delete":
 					if (args.length > 1) {
                         Client.printUsage("The `delete` command requires 0 or 1 argument. type help for more infos");
                         return;
                     }
-					String id = args[1];
-//                    this.delete(id);
+					String idDelete = args[1];
+//                    this.delete(idDelete);
                     break;
 				case "list":
 					if (args.length > 1) {
                         Client.printUsage("The `delete` command requires 0 or 1 argument. type help for more infos");
                         return;
                     }
-					Bool justUnread = args[1];
+					String justUnread = args[1];
 //                    this.list(justUnread);
                     break;
                 case "search":
@@ -127,7 +137,7 @@ public class Client implements Runnable {
                         Client.printUsage("The `search` command requires 1 argument. type help for more infos");
                         return;
                     }
-					string keywords = args[1];
+					String keywords = args[1];
 //                    this.search(keywords);
                     break;
                 case "create-group":
@@ -144,9 +154,9 @@ public class Client implements Runnable {
                         Client.printUsage("The `join-group` command requires 1 argument. type help for more infos");
                         return;
                     }
-					String groupName = args[1];
-					String userName = args[3];
-//                    this.joinGroup(groupName, userName);
+					String joinGroupName = args[1];
+					String joinUserName = args[3];
+//                    this.joinGroup(joinGroupName, joinUserName);
                     break;
                 case "publish-group-list":
 					if (args.length > 0) {
@@ -216,6 +226,20 @@ public class Client implements Runnable {
         return md5;
     }
 
+    public void opensession(String userName, String password) throws RemoteException {
+        ServerResponse response = localServerStub.openSession(userName, password);
+        if(!response.isSuccessful()){
+            System.err.println(response.getErrorMessage());
+        }
+        else{
+            token = (String)response.getData();
+            FileManager tokenFile = new FileManager("client");
+            try(BufferedWriter pw = tokenFile.newBufferedWriter("tokenFile")){
+                pw.write(token);
+            }catch(IOException e){} 
+        }
+    }
+
     public void send(String subject, String addrDest, String content) {
         //localServerStub.sendEmail(to, subject, content);
     }
@@ -235,7 +259,7 @@ public class Client implements Runnable {
         //localServerStub.searchMail(kwds);
     }
 	
-	public void list(Bool justUnread) {
+	public void list(boolean justUnread) {
         //localServerStub.list(justUnread);
     }
 
