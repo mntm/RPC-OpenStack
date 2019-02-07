@@ -13,7 +13,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.List;
+import java.util.*;
 
 public class Client implements Runnable {
 
@@ -32,6 +32,10 @@ public class Client implements Runnable {
         try {
             //{{ Initializes connection to the auth server and the file server
             this.localServerStub = (ServerInterface) loadServerStub("127.0.0.1", "server");
+            FileManager tokenFile = new FileManager("client");
+            if(tokenFile.isReadable("tokenFile")){
+                getToken();
+            }
             //}}
         } catch (Exception e) {
         }
@@ -62,8 +66,8 @@ public class Client implements Runnable {
         System.out.println("USAGE:");
         System.out.println("    opensession -u <UserName> -p <Password>");
         System.out.println("    send -s \"<subject>\" <emailAdress> <Content>");
-        System.out.println("    read <idEmail>");
-        System.out.println("    delete <idEmail>");
+        System.out.println("    read");
+        System.out.println("    delete");
 		System.out.println("    list -ur");
 		System.out.println("    search <word>");
         System.out.println("    lock-group-list");
@@ -96,7 +100,7 @@ public class Client implements Runnable {
                     }
                     String userName = args[2];
                     String password = args[4];
-                    this.opensession(userName,password);
+                    opensession(userName,password);
                     break;
                 case "send":
                     if (args.length < 4) {
@@ -106,11 +110,15 @@ public class Client implements Runnable {
 					String subject = args[2];
 					String addrDest = args[3];
 					String content = args[4];
-//                    this.send(subject, addrDest, content);
+                    System.out.println(subject);
+                    System.out.println(addrDest);
+                    System.out.println(content);
+
+                    send(subject, addrDest, content);
                     break;
                 case "read":
 					if (args.length > 1) {
-                        Client.printUsage("The `read` command requires 0 or 1 argument. type help for more infos");
+                        Client.printUsage("The `read` command requires 0 argument. type help for more infos");
                         return;
                     }
 					String idRead = args[1];
@@ -126,19 +134,22 @@ public class Client implements Runnable {
                     break;
 				case "list":
 					if (args.length > 1) {
-                        Client.printUsage("The `delete` command requires 0 or 1 argument. type help for more infos");
+                        Client.printUsage("The `list` command requires 0 or 1 argument. type help for more infos");
                         return;
                     }
 					String justUnread = args[1];
 //                    this.list(justUnread);
                     break;
                 case "search":
-					if (args.length != 1) {
-                        Client.printUsage("The `search` command requires 1 argument. type help for more infos");
+					if (args.length < 2) {
+                        Client.printUsage("The `search` command requires at least 1 argument. type help for more infos");
                         return;
                     }
-					String keywords = args[1];
-//                    this.search(keywords);
+					String[] keywords = new String[args.length - 1];
+                    for (int i = 1; i < args.length; i++) { 
+                        keywords[i-1] = args[i]; 
+                    } 
+                    search(keywords);
                     break;
                 case "create-group":
 					if (args.length != 3) {
@@ -226,11 +237,16 @@ public class Client implements Runnable {
         return md5;
     }
 
+    public void getToken(){
+        FileManager tokenFile = new FileManager("client");
+        try(BufferedReader pw = tokenFile.newBufferedReader("tokenFile")){
+            token = pw.readLine();
+        }catch(IOException e){} 
+    }
+
     public void opensession(String userName, String password) throws RemoteException {
         ServerResponse response = localServerStub.openSession(userName, password);
-        if(!response.isSuccessful()){
-            System.err.println(response.getErrorMessage());
-        }
+        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
         else{
             token = (String)response.getData();
             FileManager tokenFile = new FileManager("client");
@@ -240,36 +256,61 @@ public class Client implements Runnable {
         }
     }
 
-    public void send(String subject, String addrDest, String content) {
-        //localServerStub.sendEmail(to, subject, content);
+    public void send(String subject, String addrDest, String content) throws RemoteException {
+        ServerResponse response = localServerStub.sendEmail(addrDest, subject, content, token);
+        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
     }
 
 
-    public void read(int id) {
-        //localServerStub.readMail(id);
+    public void read() throws RemoteException {
+        /*ServerResponse response = localServerStub.readMail(id, token);
+        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
+        else{
+            
+        }*/
     }
 
 
-    public void delete(int id) {
-        //localServerStub.deleteMail(id);
+    public void delete() throws RemoteException {
+        /*EmailMetaData listEmail = list();
+        ServerResponse response = localServerStub.deleteMail(id, token);
+        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
+        else{
+            
+        }*/
     }
 
 
-    public void search(String keywords) {
-        //localServerStub.searchMail(kwds);
+    public void search(String[] keywords) throws RemoteException {
+        ServerResponse response = localServerStub.searchMail(keywords, token);
+        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
+        else{
+            ArrayList<EmailMetadata> listEmail = (ArrayList<EmailMetadata>)response.getData();
+            for(int i = 0; i < listEmail.size(); i++){
+                System.out.println(listEmail.get(i).toString());
+            }
+        }
     }
 	
-	public void list(boolean justUnread) {
-        //localServerStub.list(justUnread);
+	public void list(boolean justUnread) throws RemoteException {
+        ServerResponse response = localServerStub.listMails(justUnread, token);
+        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
+        else{
+            
+        }
     }
 
-    public void createGroup(String groupName) {
+    public void createGroup(String groupName) throws RemoteException {
         Group group = new Group(groupName);
         groups.add(group);
+        /*FileManager tokenFile = new FileManager("client");
+        try(BufferedWriter pw = tokenFile.newBufferedWriter("tokenFile")){
+            pw.write(token);
+        }catch(IOException e){} */
     }
 
 
-    public void joinGroup(String groupName, String user) {
+    public void joinGroup(String groupName, String user) throws RemoteException {
         Group group = new Group(groupName);
         group.addMember(user);
         groups.add(group);
@@ -277,12 +318,19 @@ public class Client implements Runnable {
 
 
     public void publishGroupList() throws RemoteException {
-        lockGroupList();
-        //localServerStub.pushGroupList(groups);
+        ServerResponse response = localServerStub.pushGroupList(groups, token);
+        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
+        else{
+            
+        }
     }
 
 
     public void lockGroupList() throws RemoteException {
-        //localServerStub.lockGroupList();
+        ServerResponse response = localServerStub.lockGroupList(token);
+        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
+        else{
+            
+        }
     }
 }
