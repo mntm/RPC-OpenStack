@@ -11,15 +11,14 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Client implements Runnable {
 
     // Attributes
     private ServerInterface localServerStub = null;
-    private FileManager clientFileManager = new FileManager("client_files");
-    private List<Group> groups = null;
+    private FileManager clientFileManager = new FileManager("client");
+    private HashMap<String, Group> groups = new HashMap<>(); // holds the group name and its members
     private String[] args = null;
     private String token = null;
 
@@ -68,7 +67,7 @@ public class Client implements Runnable {
         System.out.println("    read");
         System.out.println("    delete");
         System.out.println("    list [-ur]");
-		System.out.println("    search <word>");
+		System.out.println("    search <words>");
         System.out.println("    lock-group-list");
         System.out.println("    create-group <groupName> --descr <groupDescription>");
         System.out.println("    join-group <groupName> -u <userName>");
@@ -109,10 +108,6 @@ public class Client implements Runnable {
 					String subject = args[2];
 					String addrDest = args[3];
 					String content = args[4];
-                    System.out.println(subject);
-                    System.out.println(addrDest);
-                    System.out.println(content);
-
                     send(subject, addrDest, content);
                     break;
                 case "read":
@@ -145,37 +140,36 @@ public class Client implements Runnable {
                     search(keywords);
                     break;
                 case "create-group":
-					if (args.length != 3) {
+					if (args.length != 2) {
                         Client.printUsage("The `create-group` command requires 1 argument. type help for more infos");
                         return;
                     }
 					String groupName = args[1];
-					String groupDescr = args[3];
-//                    this.createGroup(groupName, groupDescr);
+                    this.createGroup(groupName);
                     break;
                 case "join-group":
-					if (args.length != 3) {
-                        Client.printUsage("The `join-group` command requires 1 argument. type help for more infos");
+					if (args.length != 4) {
+                        Client.printUsage("The `join-group` command requires 3 argument. type help for more infos");
                         return;
                     }
 					String joinGroupName = args[1];
 					String joinUserName = args[3];
-//                    this.joinGroup(joinGroupName, joinUserName);
+                    this.joinGroup(joinGroupName, joinUserName);
                     break;
                 case "publish-group-list":
-					if (args.length > 0) {
+					if (args.length > 1) {
                         Client.printUsage("The `publish-group-list` command requires 0 argument. type help for more infos");
                         return;
                     }
-//                    this.publishGroupList();
+                    this.publishGroupList();
                     break;
 
                 case "lock-group-list":
-				if (args.length > 0) {
+				if (args.length > 1) {
                         Client.printUsage("The `lock-group-list` command requires 0 argument. type help for more infos");
                         return;
                     }
-//                   this.lockGroupList();
+                   this.lockGroupList();
                     break;
 
                 case "help":
@@ -231,8 +225,7 @@ public class Client implements Runnable {
     }
 
     public void getToken(){
-        FileManager tokenFile = new FileManager("client");
-        try(BufferedReader pw = tokenFile.newBufferedReader("tokenFile")){
+        try(BufferedReader pw = clientFileManager.newBufferedReader("tokenFile")){
             token = pw.readLine();
         }catch(IOException e){} 
     }
@@ -242,8 +235,7 @@ public class Client implements Runnable {
         if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
         else{
             token = (String)response.getData();
-            FileManager tokenFile = new FileManager("client");
-            try(BufferedWriter pw = tokenFile.newBufferedWriter("tokenFile")){
+            try(BufferedWriter pw = clientFileManager.newBufferedWriter("tokenFile")){
                 pw.write(token);
             }catch(IOException e){} 
         }
@@ -315,36 +307,61 @@ public class Client implements Runnable {
 
     public void createGroup(String groupName) throws RemoteException {
         Group group = new Group(groupName);
-        groups.add(group);
-        /*FileManager tokenFile = new FileManager("client");
-        try(BufferedWriter pw = tokenFile.newBufferedWriter("tokenFile")){
-            pw.write(token);
-        }catch(IOException e){} */
+        this.groups.put(groupName,group);
+        writeGroupFiles();
     }
 
+    public void getGroupFromLocalFile(){
+        try (BufferedReader reader = clientFileManager.newBufferedReader("groups");) {
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                String[] split = line.split(":");
+                Group g = new Group(split[0]);
+
+                for (String user : split[1].split(",")) {
+                    g.addMember(user);
+                }
+                this.groups.put(split[0], g);
+            }
+        } catch (IOException e) {
+            System.err.println("Impossible de lire le fichier ");
+        }
+    }
 
     public void joinGroup(String groupName, String user) throws RemoteException {
-        Group group = new Group(groupName);
-        group.addMember(user);
-        groups.add(group);
+        try {
+            BufferedReader reader = clientFileManager.newBufferedReader("groups");
+            int lineNum = 0;
+            String line;
+            List<String> lines = new ArrayList<String>();
+            while ((line = reader.readLine()) != null) {
+                if(line.contains(groupName)) { 
+                    line = line + "," + user;
+                }
+                lines.add(line);
+            }
+            try(BufferedWriter pw = clientFileManager.newBufferedWriter("groups")){
+                for(int i = 0; i < lines.size();i++){
+                    pw.write(lines.get(i));
+                }
+            }catch(IOException e){}
+        } catch(Exception e) { 
+            System.out.println("Erreur");
+        }
     }
 
-
     public void publishGroupList() throws RemoteException {
-        ServerResponse response = localServerStub.pushGroupList(groups, token);
+        getGroupFromLocalFile();
+        List<Group> groupList = new ArrayList<Group>(groups.values());
+        ServerResponse response = localServerStub.pushGroupList(groupList, token);
         if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
-        else{
-            
-        }
     }
 
 
     public void lockGroupList() throws RemoteException {
         ServerResponse response = localServerStub.lockGroupList(token);
         if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
-        else{
-            
-        }
+        else{ System.err.println((String)response.getData());}
     }
 
     private int printEmailList(List<EmailMetadata> list, boolean ret) {
@@ -367,7 +384,6 @@ public class Client implements Runnable {
         return index;
     }
 
-
     private int getLineNumber(String message, int up) {
         System.out.print("\n" + message);
         Scanner scanner = new Scanner(System.in);
@@ -379,5 +395,23 @@ public class Client implements Runnable {
             ret = getLineNumber(message, up);
         }
         return ret;
+    }
+
+    private synchronized void writeGroupFiles() {
+        // <nom_du_groupe>:user1,user2,user3
+
+        try (BufferedWriter bw = clientFileManager.newBufferedWriter("groups")) {
+            this.groups.forEach((String k, Group v) -> {
+                try {
+                    bw.write(v.toString());
+                    bw.newLine();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
