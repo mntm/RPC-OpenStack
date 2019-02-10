@@ -45,77 +45,6 @@ public class Server implements ServerInterface {
         server.run();
     }
 
-    private void readLoginFiles() {
-        // <login>:<password>
-
-        try (BufferedReader br = this.serverFileManager.newBufferedReader(LOGIN_FILE)) {
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                String[] split = line.split(":");
-                this.logins.put(split[0], split[1]);
-            }
-        } catch (IOException e) {
-            System.err.println("Impossible de lire le fichier " + LOGIN_FILE);
-        }
-    }
-
-    private void writeLoginFiles() {
-        // <login>:<password>
-
-        try (BufferedWriter bw = this.serverFileManager.newBufferedWriter(LOGIN_FILE)) {
-            this.logins.forEach((k, v) -> {
-                StringBuilder sb = new StringBuilder();
-                sb.append(k).append(":").append(v);
-                try {
-                    bw.write(sb.toString());
-                    bw.newLine();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private synchronized void readGroupFiles() {
-        // <nom_du_groupe>:user1,user2,user3
-
-        try (BufferedReader br = this.serverFileManager.newBufferedReader(GROUP_FILE)) {
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                String[] split = line.split(":");
-                Group g = new Group(split[0]);
-
-                for (String user : split[1].split(",")) {
-                    g.addMember(user);
-                }
-
-                this.groups.put(split[0], g);
-            }
-        } catch (IOException e) {
-            System.err.println("Impossible de lire le fichier " + GROUP_FILE);
-        }
-    }
-
-    private synchronized void writeGroupFiles() {
-        // <nom_du_groupe>:user1,user2,user3
-
-        try (BufferedWriter bw = this.serverFileManager.newBufferedWriter(GROUP_FILE)) {
-            this.groups.forEach((String k, Group v) -> {
-                try {
-                    bw.write(v.toString());
-                    bw.newLine();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Run the file server.
      */
@@ -142,7 +71,7 @@ public class Server implements ServerInterface {
         }
 
         this.readLoginFiles();
-        this.readGroupFiles();
+        this.readGroupFile();
     }
 
     @Override
@@ -185,10 +114,10 @@ public class Server implements ServerInterface {
             return response;
         }
 
-        this.readGroupFiles();
-
         response.setSuccessful(true);
-        response.setData((List<Group>) this.groups.values());
+        List<Group> list = new ArrayList<>();
+        list.addAll(this.groups.values());
+        response.setData(list);
 
         return response;
     }
@@ -245,13 +174,18 @@ public class Server implements ServerInterface {
             }
         }
 
+        if (groups.size() == 0) {
+            response.setSuccessful(false);
+            response.setErrorMessage("La liste envoye est vide. Aucune operation n'a ete entrepris.");
+            return response;
+        }
         this.groups = new HashMap<>();
         for (Group g :
                 groups) {
             this.groups.put(g.getName(), g);
         }
 
-        this.writeGroupFiles();
+        this.writeGroupFile();
 
         // Enlever le verrou
         try {
@@ -287,7 +221,7 @@ public class Server implements ServerInterface {
         }
 
 
-        // Ecrire le contenue du courriel dans le dossier du destinataire;
+        // Ecrire le contenu du courriel dans le dossier du destinataire;
         // Si groupe, ecrire dans le dossier de chaque membre.
         StringBuilder sb = new StringBuilder();
         if (to_user) {
@@ -296,6 +230,7 @@ public class Server implements ServerInterface {
                 sb.append("Le courriel n'as pas ete achemine a ").append(to).append(". Reessayez plus tard.");
             }
         }
+
 
         if (to_group) {
             sb.append("Envoye du courriel ").append(subj).append(" au groupe ").append(to).append(":");
@@ -415,14 +350,6 @@ public class Server implements ServerInterface {
         // remove the actual file
         try {
             fm.deleteFile(metadata.getContentPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-            response.setSuccessful(false);
-            response.setErrorMessage("Un probleme est survenu lors de la suppression du courriel.");
-            return response;
-        }
-
-        try {
             HashMap<String, EmailMetadata> mets = this.readMetadata(user);
             mets.remove(metadata.getContentPath());
             this.writeMetadata(mets, user);
@@ -451,16 +378,17 @@ public class Server implements ServerInterface {
         List<EmailMetadata> data = new ArrayList<>();
 
         try {
+            // Recherche les mots cles dans le sujet et le corps des courriels
             HashMap<String, EmailMetadata> mets = this.readMetadata(user);
-            for (String key : mets.keySet()) {
-                String s = fm.readFile(key);
+            mets.forEach((k, v) -> {
+                String s = fm.readFile(k);
                 for (String kwd : keywords) {
-                    if (s.contains(kwd)) {
-                        data.add(mets.get(key));
+                    if ((v.getSubject().contains(kwd)) || (s.contains(kwd))) {
+                        data.add(mets.get(k));
                         break;
                     }
                 }
-            }
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -469,20 +397,88 @@ public class Server implements ServerInterface {
         return response;
     }
 
+    /**
+     * Lis la liste des utilisateurs a partir du disque
+     */
+    private void readLoginFiles() {
+        // <login>:<password>
 
+        try (BufferedReader br = this.serverFileManager.newBufferedReader(LOGIN_FILE)) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                String[] split = line.split(":");
+                this.logins.put(split[0], split[1]);
+            }
+        } catch (IOException e) {
+            System.err.println("Impossible de lire le fichier " + LOGIN_FILE);
+        }
+    }
+
+    /**
+     * Lis la liste des groupes globales a partir du disque. (Unserialization)
+     */
+    private synchronized void readGroupFile() {
+        try {
+
+            Collection<Object> objects = this.serverFileManager.readSerializeableObjects(GROUP_FILE);
+
+            objects.forEach((o) -> {
+                Group g = (Group) o;
+                this.groups.put(g.getName(), g);
+            });
+
+        } catch (IOException e) {
+        }
+    }
+
+    /**
+     * Ecris la liste des groupes sur le disque. (Serialization)
+     */
+    private synchronized void writeGroupFile() {
+        if (this.serverFileManager.isReadable(GROUP_FILE)) {
+            try {
+                this.serverFileManager.deleteFile(GROUP_FILE);
+            } catch (IOException e) {
+            }
+        }
+        this.groups.forEach((String k, Group v) -> {
+            try {
+                this.serverFileManager.writeSerializeableObject(GROUP_FILE, v, StandardOpenOption.WRITE,
+                        StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    /**
+     * Genere une chaine aleatoire
+     *
+     * @param str
+     * @return
+     */
     private String generateToken(String str) {
 
         StringBuilder sb = new StringBuilder();
         Random rand = new Random((int) (Math.random() * 100000) * str.hashCode());
         int count = 16;
         while (count-- != 0) {
-            int character = (int) (Math.abs(rand.nextInt()) % ALPHA_NUMERIC_STRING.length());
+            int character = (Math.abs(rand.nextInt()) % ALPHA_NUMERIC_STRING.length());
             sb.append(ALPHA_NUMERIC_STRING.charAt(character));
 
         }
         return sb.toString();
     }
 
+    /**
+     * Cree un objet EmailMetadata et le fichiers contenant le courriel correspondant
+     *
+     * @param from    expediteur
+     * @param to      destinataire
+     * @param subj    Sujet
+     * @param content contenu
+     * @return
+     */
     private int createEmail(String from, String to, String subj, String content) {
         FileManager fm = new FileManager(SERVER_DIR_NAME + to);
 
@@ -513,6 +509,13 @@ public class Server implements ServerInterface {
         return EMAIL_SUCCESS;
     }
 
+    /**
+     * Lis les informations des courriels ecrits sur le disque
+     *
+     * @param user
+     * @return
+     * @throws IOException
+     */
     private HashMap<String, EmailMetadata> readMetadata(String user) throws IOException {
         HashMap<String, EmailMetadata> datas = new HashMap<>();
         FileManager fm = new FileManager(SERVER_DIR_NAME + user);
@@ -530,6 +533,13 @@ public class Server implements ServerInterface {
         return datas;
     }
 
+    /**
+     * Ecris les informations des courriels sur le disque
+     *
+     * @param metas
+     * @param user
+     * @throws IOException
+     */
     private void writeMetadata(HashMap<String, EmailMetadata> metas, String user) throws IOException {
         FileManager fm = new FileManager(SERVER_DIR_NAME + user);
         BufferedWriter bw = fm.newBufferedWriter(EMAIL_META_FILE);

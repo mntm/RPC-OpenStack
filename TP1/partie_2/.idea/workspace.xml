@@ -2,8 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="374c05a7-ae99-4f54-bbcf-12a2a3bacf58" name="Default" comment="Group, User, ServerInterface et Server">
+      <change beforePath="$PROJECT_DIR$/../../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client.sh" beforeDir="false" afterPath="$PROJECT_DIR$/client.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/groups" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/tokenFile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.sh" beforeDir="false" afterPath="$PROJECT_DIR$/server.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/groups" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/legit_users" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/client/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/client/Client.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/server/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/server/Server.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/FileManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/FileManager.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -11,69 +21,123 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FUSProjectUsageTrigger">
-    <session id="1359776492">
-      <usages-collector id="statistics.lifecycle.project">
-        <counts>
-          <entry key="project.closed" value="1" />
-          <entry key="project.open.time.2" value="1" />
-          <entry key="project.opened" value="1" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.extensions.edit">
-        <counts>
-          <entry key="java" value="348" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.types.edit">
-        <counts>
-          <entry key="JAVA" value="348" />
-        </counts>
-      </usages-collector>
-    </session>
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/partie_2$FileManager.ic" NAME="FileManager Coverage Results" MODIFIED="1549821886803" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>ca.polymtl.inf8480.tp1.shared.*</FILTER>
+    </SUITE>
+  </component>
+  <component name="CoverageViewManager">
+    <option name="myElementSize" value="109" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/server/Server.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="92">
-              <caret line="240" lean-forward="true" selection-start-line="240" selection-end-line="240" />
+            <state relative-caret-position="238">
+              <caret line="429" column="33" selection-start-line="429" selection-start-column="33" selection-end-line="429" selection-end-column="33" />
               <folding>
-                <element signature="imports" expanded="true" />
+                <element signature="docComment;class#Server#0" />
+                <element signature="method#Server#0;class#Server#0" />
+                <element signature="method#main#0;class#Server#0" />
+                <element signature="docComment;method#run#0;class#Server#0" />
+                <element signature="e#4050#4123#1" />
+                <element signature="e#4137#4422#0" />
+                <element signature="e#4450#4691#0" />
+                <element signature="e#4712#4784#0" />
+                <element signature="method#openSession#0;class#Server#0" />
+                <element signature="e#5105#5612#1" />
+                <element signature="e#5188#5405#1" />
+                <element signature="e#5268#5391#1" />
+                <element signature="e#5411#5523#1" />
+                <element signature="e#5618#5758#1" />
+                <element signature="e#6001#6150#1" />
+                <element signature="e#6282#6439#1" />
+                <element signature="method#lockGroupList#0;class#Server#0" />
+                <element signature="e#6808#6957#1" />
+                <element signature="e#7018#7268#1" />
+                <element signature="e#7357#7413#0" />
+                <element signature="e#7436#7480#0" />
+                <element signature="e#7860#8009#1" />
+                <element signature="e#8071#8324#1" />
+                <element signature="e#8450#8648#1" />
+                <element signature="e#8878#8948#0" />
+                <element signature="e#8971#9015#0" />
+                <element signature="method#sendEmail#0;class#Server#0" />
+                <element signature="e#9312#9461#1" />
+                <element signature="e#9734#9908#1" />
+                <element signature="e#9919#9985#0" />
+                <element signature="e#10118#10381#1" />
+                <element signature="e#10198#10371#1" />
+                <element signature="e#10405#10877#1" />
+                <element signature="e#10573#10867#1" />
+                <element signature="e#10656#10853#1" />
+                <element signature="e#11233#11382#1" />
+                <element signature="e#11541#11689#1" />
+                <element signature="e#11819#12216#0" />
+                <element signature="e#11897#12127#1" />
+                <element signature="e#12239#12515#0" />
+                <element signature="e#12549#12668#1" />
+                <element signature="method#readMail#0;class#Server#0" />
+                <element signature="e#12910#13059#1" />
+                <element signature="e#13281#13430#1" />
+                <element signature="e#13436#13480#1" />
+                <element signature="e#13527#13716#0" />
+                <element signature="e#13739#13867#0" />
+                <element signature="method#deleteMail#0;class#Server#0" />
+                <element signature="e#14162#14311#1" />
+                <element signature="e#14996#15124#0" />
+                <element signature="method#searchMail#0;class#Server#0" />
+                <element signature="e#15389#15538#1" />
+                <element signature="e#15720#16121#0" />
+                <element signature="e#15638#15869#0" />
+                <element signature="e#15691#15855#1" />
+                <element signature="e#15734#15837#1" />
+                <element signature="e#16144#16188#0" />
+                <element signature="method#readLoginFiles#0;class#Server#0" />
+                <element signature="e#14201#14414#0" />
+                <element signature="e#14286#14404#1" />
+                <element signature="e#14437#14527#0" />
+                <element signature="method#writeGroupFile#0;class#Server#0" />
+                <element signature="e#15079#15210#1" />
+                <element signature="e#15097#15175#0" />
+                <element signature="e#15239#15561#0" />
+                <element signature="e#15280#15476#0" />
+                <element signature="e#15499#15551#0" />
+                <element signature="docComment;method#generateToken#0;class#Server#0" />
+                <element signature="method#generateToken#0;class#Server#0" />
+                <element signature="e#16487#16656#1" />
+                <element signature="docComment;method#createEmail#0;class#Server#0" />
+                <element signature="method#createEmail#0;class#Server#0" />
+                <element signature="e#17133#17201#0" />
+                <element signature="e#17224#17308#0" />
+                <element signature="e#17524#17601#0" />
+                <element signature="e#17624#17705#0" />
+                <element signature="docComment;method#readMetadata#0;class#Server#0" />
+                <element signature="method#readMetadata#0;class#Server#0" />
+                <element signature="e#18101#18279#1" />
+                <element signature="docComment;method#writeMetadata#0;class#Server#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/User.java">
+        <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/client/Client.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="16" column="18" lean-forward="true" selection-start-line="16" selection-start-column="18" selection-end-line="16" selection-end-column="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/ServerInterface.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="525">
-              <caret line="37" selection-start-line="37" selection-end-line="37" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/Group.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="39" column="17" selection-start-line="39" selection-start-column="17" selection-end-line="39" selection-end-column="17" />
+            <state relative-caret-position="205">
+              <caret line="412" column="33" selection-start-line="412" selection-start-column="33" selection-end-line="412" selection-end-column="33" />
               <folding>
-                <element signature="e#276#277#0" expanded="true" />
-                <element signature="e#308#309#0" expanded="true" />
-                <element signature="e#339#340#0" expanded="true" />
-                <element signature="e#366#367#0" expanded="true" />
+                <element signature="method#loadServerStub#0;class#Client#0" />
+                <element signature="method#getToken#0;class#Client#0" />
+                <element signature="method#opensession#0;class#Client#0" />
+                <element signature="e#8635#8683#0" />
+                <element signature="method#send#0;class#Client#0" />
+                <element signature="method#delete#0;class#Client#0" />
+                <element signature="method#list#0;class#Client#0" />
+                <element signature="method#createGroup#0;class#Client#0" />
+                <element signature="method#getLineNumber#0;class#Client#0" />
+                <element signature="method#writeGroupFile#0;class#Client#0" />
               </folding>
             </state>
           </provider>
@@ -82,8 +146,20 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/FileManager.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1590">
-              <caret line="111" column="14" selection-start-line="111" selection-start-column="14" selection-end-line="111" selection-end-column="14" />
+            <state relative-caret-position="1740">
+              <caret line="154" column="86" selection-start-line="154" selection-start-column="86" selection-end-line="154" selection-end-column="86" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/ServerInterface.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-473">
+              <caret line="41" column="45" selection-start-line="41" selection-start-column="41" selection-end-line="41" selection-end-column="45" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -103,9 +179,19 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find />
+      <find>@param token</find>
+      <find>.err.</find>
+      <find>&quot;file&quot;</find>
+      <find>Invalid</find>
+      <find>ArrayList</find>
+      <find>List&lt;</find>
+      <find>impo</find>
+      <find>imp</find>
     </findStrings>
     <replaceStrings>
       <replace>\n</replace>
+      <replace>@param token jeton de connexion obtenue lors de l'appel de openSession</replace>
+      <replace>filename</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -115,108 +201,28 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/server/legit_users" />
-        <option value="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/Group.java" />
         <option value="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/User.java" />
+        <option value="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/Email.java" />
+        <option value="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/ServerResponse.java" />
         <option value="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/ServerInterface.java" />
+        <option value="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/EmailMetadata.java" />
+        <option value="$PROJECT_DIR$/client/tokenFile" />
+        <option value="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/FileManager.java" />
+        <option value="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/Group.java" />
+        <option value="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/client/Client.java" />
         <option value="$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/server/Server.java" />
       </list>
     </option>
   </component>
+  <component name="MavenProjectNavigator">
+    <treeState>
+      <expand />
+      <select />
+    </treeState>
+  </component>
   <component name="ProjectFrameBounds">
     <option name="width" value="1366" />
     <option name="height" value="749" />
-  </component>
-  <component name="ProjectInspectionProfilesVisibleTreeState">
-    <entry key="Project Default">
-      <profile-state>
-        <expanded-state>
-          <State>
-            <id />
-          </State>
-          <State>
-            <id>Android &gt; Lint &gt; Correctness</id>
-          </State>
-          <State>
-            <id>Android &gt; Lint &gt; Correctness &gt; Messages</id>
-          </State>
-          <State>
-            <id>Android &gt; Lint &gt; Performance</id>
-          </State>
-          <State>
-            <id>Android &gt; Lint &gt; Usability &gt; Icons</id>
-          </State>
-          <State>
-            <id>Android Lint for Kotlin</id>
-          </State>
-          <State>
-            <id>Bitwise operation issuesJava</id>
-          </State>
-          <State>
-            <id>Class metricsJava</id>
-          </State>
-          <State>
-            <id>Class structureJava</id>
-          </State>
-          <State>
-            <id>Control flow issuesJava</id>
-          </State>
-          <State>
-            <id>Error handlingGroovy</id>
-          </State>
-          <State>
-            <id>Error handlingJava</id>
-          </State>
-          <State>
-            <id>Groovy</id>
-          </State>
-          <State>
-            <id>Internationalization issuesJava</id>
-          </State>
-          <State>
-            <id>JSON</id>
-          </State>
-          <State>
-            <id>Java</id>
-          </State>
-          <State>
-            <id>Method MetricsGroovy</id>
-          </State>
-          <State>
-            <id>Method metricsJava</id>
-          </State>
-          <State>
-            <id>Numeric issuesJava</id>
-          </State>
-          <State>
-            <id>Performance issuesJava</id>
-          </State>
-          <State>
-            <id>Plugin DevKit</id>
-          </State>
-          <State>
-            <id>Potentially confusing code constructsGroovy</id>
-          </State>
-          <State>
-            <id>Probable bugsJava</id>
-          </State>
-          <State>
-            <id>Properties Files</id>
-          </State>
-          <State>
-            <id>Threading issuesGroovy</id>
-          </State>
-          <State>
-            <id>Threading issuesJava</id>
-          </State>
-          <State>
-            <id>XML</id>
-          </State>
-          <State>
-            <id>XSLT</id>
-          </State>
-        </expanded-state>
-      </profile-state>
-    </entry>
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -224,8 +230,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -233,37 +237,54 @@
               <item name="partie_2" type="b2602c69:ProjectViewProjectNode" />
               <item name="partie_2" type="462c0819:PsiDirectoryNode" />
             </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="PackagesPane">
+        <subPane>
+          <expand>
             <path>
-              <item name="partie_2" type="b2602c69:ProjectViewProjectNode" />
-              <item name="partie_2" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="partie_2" type="58d84e3e:PackageViewProjectNode" />
+              <item name="partie_2" type="616d4139:PackageViewModuleNode" />
             </path>
             <path>
-              <item name="partie_2" type="b2602c69:ProjectViewProjectNode" />
-              <item name="partie_2" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="tp1" type="462c0819:PsiDirectoryNode" />
+              <item name="partie_2" type="58d84e3e:PackageViewProjectNode" />
+              <item name="partie_2" type="616d4139:PackageViewModuleNode" />
+              <item name="ca.polymtl.inf8480.tp1" type="1f31426a:PackageElementNode" />
             </path>
             <path>
-              <item name="partie_2" type="b2602c69:ProjectViewProjectNode" />
-              <item name="partie_2" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="tp1" type="462c0819:PsiDirectoryNode" />
-              <item name="server" type="462c0819:PsiDirectoryNode" />
+              <item name="partie_2" type="58d84e3e:PackageViewProjectNode" />
+              <item name="partie_2" type="616d4139:PackageViewModuleNode" />
+              <item name="ca.polymtl.inf8480.tp1" type="1f31426a:PackageElementNode" />
+              <item name="client" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="partie_2" type="58d84e3e:PackageViewProjectNode" />
+              <item name="partie_2" type="616d4139:PackageViewModuleNode" />
+              <item name="ca.polymtl.inf8480.tp1" type="1f31426a:PackageElementNode" />
+              <item name="server" type="1f31426a:PackageElementNode" />
+            </path>
+            <path>
+              <item name="partie_2" type="58d84e3e:PackageViewProjectNode" />
+              <item name="partie_2" type="616d4139:PackageViewModuleNode" />
+              <item name="ca.polymtl.inf8480.tp1" type="1f31426a:PackageElementNode" />
+              <item name="shared" type="1f31426a:PackageElementNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1549034712692" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1549837082878" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="project.propCompiler" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -305,24 +326,6 @@
       </Profilers>
       <method />
     </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="Application" factoryName="Application">
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="JUnit" factoryName="JUnit">
-      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType" factoryName="Kotlin script">
       <option name="filePath" />
       <option name="vmParameters" />
@@ -357,7 +360,40 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="TestNG" factoryName="TestNG">
+    <configuration default="true" type="Applet">
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Server" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="ca.polymtl.inf8480.tp1.server.Server" />
+      <module name="partie_2" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="ca.polymtl.inf8480.tp1.server.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="TestNG">
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
       <properties />
       <listeners />
@@ -365,18 +401,23 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
       <module name="" />
       <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
       <option name="PROGRAM_PARAMETERS" />
-      <predefined_log_file id="idea.log" enabled="true" />
+      <predefined_log_file enabled="true" id="idea.log" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.Server" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
-    <configuration />
+    <configuration>$USER_HOME$/.subversion</configuration>
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -386,13 +427,28 @@
       <option name="presentableId" value="Default" />
       <updated>1548860335525</updated>
     </task>
+    <task id="LOCAL-00001" summary="Implementation des fonctions de base du serveur.&#10;&#10;Ajout de commentaire dans le fichier ServerInterface.java&#10;`ServerResponse.isSuccessful()` retourne `true` par defaut">
+      <created>1549226754532</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1549226754532</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Implementation du client&#10;&#10;- Read fait&#10;- list fait&#10;- delete fait&#10;- search fait&#10;&#10;Bugfix sur le serveur">
+      <created>1549563378893</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1549563378895</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1366" height="749" extended-state="0" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.08181818" />
-      <window_info id="Structure" order="1" weight="0.1905016" />
+      <window_info active="true" content_ui="combo" x="258" y="30" width="451" height="729" id="Project" order="0" visible="true" weight="0.15075758" />
+      <window_info id="Structure" order="1" side_tool="true" visible="true" weight="0.15075758" />
       <window_info id="Nl-Palette" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
       <window_info id="Image Layers" order="4" />
@@ -400,19 +456,51 @@
       <window_info id="UI Designer" order="6" />
       <window_info id="Capture Tool" order="7" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32890365" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.3275862" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3291536" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.49924242" weight="0.80877745" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.3291536" />
+      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5007576" side_tool="true" weight="0.80877745" />
+      <window_info anchor="bottom" id="Messages" order="10" weight="0.3291536" />
+      <window_info anchor="right" id="Coverage" side_tool="true" weight="0.3295129" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.07651515" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Palette" order="3" />
+      <window_info anchor="right" id="Capture Analysis" order="4" />
+      <window_info anchor="right" id="Theme Preview" order="5" />
+      <window_info anchor="right" id="Properties" order="6" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="right" id="Maven Projects" order="8" weight="0.3295129" />
+      <window_info anchor="right" id="PlantUML" order="9" weight="0.3295129" />
+      <window_info anchor="right" id="Maven" order="10" />
+    </layout>
+    <layout-to-restore>
+      <window_info content_ui="combo" id="Project" order="0" weight="0.07121212" />
+      <window_info id="Structure" order="1" visible="true" weight="0.19015151" />
+      <window_info id="Nl-Palette" order="2" />
+      <window_info id="Favorites" order="3" side_tool="true" />
+      <window_info id="Image Layers" order="4" />
+      <window_info id="Designer" order="5" />
+      <window_info id="UI Designer" order="6" />
+      <window_info id="Capture Tool" order="7" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32810047" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.8100471" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="8" visible="true" weight="0.32967034" />
-      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.32964602" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.32967034" />
+      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.32810047" />
       <window_info anchor="bottom" id="Messages" order="10" weight="0.32964602" />
-      <window_info anchor="right" id="PlantUML" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" visible="true" weight="0.07651515" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.07651515" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="right" id="Capture Analysis" order="4" />
@@ -420,7 +508,8 @@
       <window_info anchor="right" id="Properties" order="6" />
       <window_info anchor="right" id="Palette&#9;" order="7" />
       <window_info anchor="right" id="Maven Projects" order="8" />
-    </layout>
+      <window_info anchor="right" id="PlantUML" order="9" />
+    </layout-to-restore>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -447,9 +536,41 @@
         </entry>
       </map>
     </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
-  <component name="VcsContentAnnotationSettings">
-    <option name="myLimit" value="2678400000" />
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <MESSAGE value="Implementation des fonctions de base du serveur.&#10;&#10;Ajout de commentaire dans le fichier ServerInterface.java&#10;`ServerResponse.isSuccessful()` retourne `true` par defaut" />
+    <MESSAGE value="Implementation du client&#10;&#10;- Read fait&#10;- list fait&#10;- delete fait&#10;- search fait&#10;&#10;Bugfix sur le serveur" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implementation du client&#10;&#10;- Read fait&#10;- list fait&#10;- delete fait&#10;- search fait&#10;&#10;Bugfix sur le serveur" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/client/Client.java</url>
+          <line>185</line>
+          <properties />
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="antWorkspaceConfiguration">
     <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
@@ -470,49 +591,165 @@
     <entry file="file://$PROJECT_DIR$/server/groups">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/ServerInterface.java">
+    <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/User.java" />
+    <entry file="jar:///usr/lib/jvm/java-8-openjdk/jre/lib/rt.jar!/java/util/HashMap.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="525">
-          <caret line="37" selection-start-line="37" selection-end-line="37" />
+        <state relative-caret-position="197">
+          <caret line="466" column="19" selection-start-line="466" selection-start-column="19" selection-end-line="466" selection-end-column="19" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/Group.java">
+    <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/ServerResponse.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="39" column="17" selection-start-line="39" selection-start-column="17" selection-end-line="39" selection-end-column="17" />
-          <folding>
-            <element signature="e#276#277#0" expanded="true" />
-            <element signature="e#308#309#0" expanded="true" />
-            <element signature="e#339#340#0" expanded="true" />
-            <element signature="e#366#367#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="195">
+          <caret line="13" column="39" selection-start-line="13" selection-start-column="39" selection-end-line="13" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/EmailMetadata.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="27" column="28" selection-start-line="27" selection-start-column="28" selection-end-line="27" selection-end-column="28" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/FileManager.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1590">
-          <caret line="111" column="14" selection-start-line="111" selection-start-column="14" selection-end-line="111" selection-end-column="14" />
+        <state relative-caret-position="1740">
+          <caret line="154" column="86" selection-start-line="154" selection-start-column="86" selection-end-line="154" selection-end-column="86" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/User.java">
+    <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/ServerInterface.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="16" column="18" lean-forward="true" selection-start-line="16" selection-start-column="18" selection-end-line="16" selection-end-column="18" />
+        <state relative-caret-position="-473">
+          <caret line="41" column="45" selection-start-line="41" selection-start-column="41" selection-end-line="41" selection-end-column="45" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/server/Server.java">
+    <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/shared/Group.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="92">
-          <caret line="240" lean-forward="true" selection-start-line="240" selection-end-line="240" />
+        <state relative-caret-position="15">
+          <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
           <folding>
             <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/client/Client.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="205">
+          <caret line="412" column="33" selection-start-line="412" selection-start-column="33" selection-end-line="412" selection-end-column="33" />
+          <folding>
+            <element signature="method#loadServerStub#0;class#Client#0" />
+            <element signature="method#getToken#0;class#Client#0" />
+            <element signature="method#opensession#0;class#Client#0" />
+            <element signature="e#8635#8683#0" />
+            <element signature="method#send#0;class#Client#0" />
+            <element signature="method#delete#0;class#Client#0" />
+            <element signature="method#list#0;class#Client#0" />
+            <element signature="method#createGroup#0;class#Client#0" />
+            <element signature="method#getLineNumber#0;class#Client#0" />
+            <element signature="method#writeGroupFile#0;class#Client#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.attach_pid6548">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/ca/polymtl/inf8480/tp1/server/Server.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="429" column="33" selection-start-line="429" selection-start-column="33" selection-end-line="429" selection-end-column="33" />
+          <folding>
+            <element signature="docComment;class#Server#0" />
+            <element signature="method#Server#0;class#Server#0" />
+            <element signature="method#main#0;class#Server#0" />
+            <element signature="docComment;method#run#0;class#Server#0" />
+            <element signature="e#4050#4123#1" />
+            <element signature="e#4137#4422#0" />
+            <element signature="e#4450#4691#0" />
+            <element signature="e#4712#4784#0" />
+            <element signature="method#openSession#0;class#Server#0" />
+            <element signature="e#5105#5612#1" />
+            <element signature="e#5188#5405#1" />
+            <element signature="e#5268#5391#1" />
+            <element signature="e#5411#5523#1" />
+            <element signature="e#5618#5758#1" />
+            <element signature="e#6001#6150#1" />
+            <element signature="e#6282#6439#1" />
+            <element signature="method#lockGroupList#0;class#Server#0" />
+            <element signature="e#6808#6957#1" />
+            <element signature="e#7018#7268#1" />
+            <element signature="e#7357#7413#0" />
+            <element signature="e#7436#7480#0" />
+            <element signature="e#7860#8009#1" />
+            <element signature="e#8071#8324#1" />
+            <element signature="e#8450#8648#1" />
+            <element signature="e#8878#8948#0" />
+            <element signature="e#8971#9015#0" />
+            <element signature="method#sendEmail#0;class#Server#0" />
+            <element signature="e#9312#9461#1" />
+            <element signature="e#9734#9908#1" />
+            <element signature="e#9919#9985#0" />
+            <element signature="e#10118#10381#1" />
+            <element signature="e#10198#10371#1" />
+            <element signature="e#10405#10877#1" />
+            <element signature="e#10573#10867#1" />
+            <element signature="e#10656#10853#1" />
+            <element signature="e#11233#11382#1" />
+            <element signature="e#11541#11689#1" />
+            <element signature="e#11819#12216#0" />
+            <element signature="e#11897#12127#1" />
+            <element signature="e#12239#12515#0" />
+            <element signature="e#12549#12668#1" />
+            <element signature="method#readMail#0;class#Server#0" />
+            <element signature="e#12910#13059#1" />
+            <element signature="e#13281#13430#1" />
+            <element signature="e#13436#13480#1" />
+            <element signature="e#13527#13716#0" />
+            <element signature="e#13739#13867#0" />
+            <element signature="method#deleteMail#0;class#Server#0" />
+            <element signature="e#14162#14311#1" />
+            <element signature="e#14996#15124#0" />
+            <element signature="method#searchMail#0;class#Server#0" />
+            <element signature="e#15389#15538#1" />
+            <element signature="e#15720#16121#0" />
+            <element signature="e#15638#15869#0" />
+            <element signature="e#15691#15855#1" />
+            <element signature="e#15734#15837#1" />
+            <element signature="e#16144#16188#0" />
+            <element signature="method#readLoginFiles#0;class#Server#0" />
+            <element signature="e#14201#14414#0" />
+            <element signature="e#14286#14404#1" />
+            <element signature="e#14437#14527#0" />
+            <element signature="method#writeGroupFile#0;class#Server#0" />
+            <element signature="e#15079#15210#1" />
+            <element signature="e#15097#15175#0" />
+            <element signature="e#15239#15561#0" />
+            <element signature="e#15280#15476#0" />
+            <element signature="e#15499#15551#0" />
+            <element signature="docComment;method#generateToken#0;class#Server#0" />
+            <element signature="method#generateToken#0;class#Server#0" />
+            <element signature="e#16487#16656#1" />
+            <element signature="docComment;method#createEmail#0;class#Server#0" />
+            <element signature="method#createEmail#0;class#Server#0" />
+            <element signature="e#17133#17201#0" />
+            <element signature="e#17224#17308#0" />
+            <element signature="e#17524#17601#0" />
+            <element signature="e#17624#17705#0" />
+            <element signature="docComment;method#readMetadata#0;class#Server#0" />
+            <element signature="method#readMetadata#0;class#Server#0" />
+            <element signature="e#18101#18279#1" />
+            <element signature="docComment;method#writeMetadata#0;class#Server#0" />
           </folding>
         </state>
       </provider>

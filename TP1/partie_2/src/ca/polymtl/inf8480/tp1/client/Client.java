@@ -5,6 +5,7 @@ import ca.polymtl.inf8480.tp1.shared.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.StandardOpenOption;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -13,7 +14,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
 
-public class Client implements Runnable {
+
+public class Client {
 
     // Attributes
     private ServerInterface localServerStub = null;
@@ -28,10 +30,10 @@ public class Client implements Runnable {
         }
 
         try {
-            //{{ Initializes connection to the auth server and the file server
+            //{{ Initializes connection to the server
             this.localServerStub = (ServerInterface) loadServerStub("127.0.0.1", "server");
             FileManager tokenFile = new FileManager("client");
-            if(tokenFile.isReadable("tokenFile")){
+            if (tokenFile.isReadable("tokenFile")) {
                 getToken();
             }
             //}}
@@ -42,16 +44,13 @@ public class Client implements Runnable {
             System.err.println("Impossible de joindre le serveur de fichier!");
             System.exit(-1);
         }
+
+        this.getGroupFromLocalFile();
     }
 
     public static void main(String[] args) {
         Client client = new Client();
-
-        if (args.length >= 1) {
-            client.set(args);
-        }
-
-        new Thread(client).start();
+        client.run(args);
     }
 
     /**
@@ -63,24 +62,16 @@ public class Client implements Runnable {
         System.out.println(msg);
         System.out.println("USAGE:");
         System.out.println("    opensession -u <UserName> -p <Password>");
-        System.out.println("    send -s \"<subject>\" <emailAdress> <Content>");
+        System.out.println("    send -s \"<subject>\" <emailAdress>");
         System.out.println("    read");
         System.out.println("    delete");
         System.out.println("    list [-ur]");
-		System.out.println("    search <words>");
+        System.out.println("    search <words>");
         System.out.println("    lock-group-list");
+        System.out.println("    get-group-list");
         System.out.println("    create-group <groupName> --descr <groupDescription>");
         System.out.println("    join-group <groupName> -u <userName>");
-		System.out.println("    publish-group-list");
-    }
-
-    public void set(final String[] args) {
-        this.args = args;
-    }
-
-    @Override
-    public void run() {
-        this.run(this.args);
+        System.out.println("    publish-group-list");
     }
 
     /**
@@ -88,7 +79,7 @@ public class Client implements Runnable {
      *
      * @param args String []
      */
-    private void run(final String[] args) {
+    public void run(final String[] args) {
         try {
             switch (args[0]) {
                 case "opensession":
@@ -98,66 +89,70 @@ public class Client implements Runnable {
                     }
                     String userName = args[2];
                     String password = args[4];
-                    opensession(userName,password);
+                    openSession(userName, password);
                     break;
                 case "send":
                     if (args.length < 4) {
                         Client.printUsage("The `send` command requires 4 argument. type help for more infos");
                         return;
                     }
-					String subject = args[2];
-					String addrDest = args[3];
-					String content = args[4];
-                    send(subject, addrDest, content);
+                    String subject = args[2];
+                    String addrDest = args[3];
+                    Scanner scanner = new Scanner(System.in);
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while (!(line = scanner.nextLine()).trim().equals(".")) {
+                        sb.append(line).append('\n');
+                    }
+                    scanner.close();
+                    send(subject, addrDest, sb.toString());
                     break;
                 case "read":
-					if (args.length > 1) {
+                    if (args.length > 1) {
                         Client.printUsage("The `read` command requires 0 argument. type help for more infos");
                         return;
                     }
                     this.read();
                     break;
                 case "delete":
-					if (args.length > 1) {
+                    if (args.length > 1) {
                         Client.printUsage("The `delete` command requires 0 or 1 argument. type help for more infos");
                         return;
                     }
                     this.delete();
                     break;
-				case "list":
+                case "list":
                     boolean unread = ((args.length > 1) && (args[1].equals("-ur")));
                     this.list(unread);
                     break;
                 case "search":
-					if (args.length < 2) {
+                    if (args.length < 2) {
                         Client.printUsage("The `search` command requires at least 1 argument. type help for more infos");
                         return;
                     }
-					String[] keywords = new String[args.length - 1];
-                    for (int i = 1; i < args.length; i++) { 
-                        keywords[i-1] = args[i]; 
-                    } 
+                    String[] keywords = new String[args.length - 1];
+                    System.arraycopy(args, 1, keywords, 0, args.length - 1);
                     search(keywords);
                     break;
                 case "create-group":
-					if (args.length != 2) {
+                    if (args.length != 2) {
                         Client.printUsage("The `create-group` command requires 1 argument. type help for more infos");
                         return;
                     }
-					String groupName = args[1];
+                    String groupName = args[1];
                     this.createGroup(groupName);
                     break;
                 case "join-group":
-					if (args.length != 4) {
+                    if (args.length != 4) {
                         Client.printUsage("The `join-group` command requires 3 argument. type help for more infos");
                         return;
                     }
-					String joinGroupName = args[1];
-					String joinUserName = args[3];
+                    String joinGroupName = args[1];
+                    String joinUserName = args[3];
                     this.joinGroup(joinGroupName, joinUserName);
                     break;
                 case "publish-group-list":
-					if (args.length > 1) {
+                    if (args.length > 1) {
                         Client.printUsage("The `publish-group-list` command requires 0 argument. type help for more infos");
                         return;
                     }
@@ -165,11 +160,15 @@ public class Client implements Runnable {
                     break;
 
                 case "lock-group-list":
-				if (args.length > 1) {
+                    if (args.length > 1) {
                         Client.printUsage("The `lock-group-list` command requires 0 argument. type help for more infos");
                         return;
                     }
-                   this.lockGroupList();
+                    this.lockGroupList();
+                    break;
+
+                case "get-group-list":
+                    this.getGroupList();
                     break;
 
                 case "help":
@@ -201,53 +200,45 @@ public class Client implements Runnable {
         return stub;
     }
 
-    private String readMD5(String fileName) {
-        // Lire le fichier md5 si il existe, sinon, retourner null
-        String md5 = null;
-        try (BufferedReader br = this.clientFileManager.newBufferedReader("." + fileName + ".md5")) {
-            md5 = br.readLine();
-        } catch (IOException e) {
-            System.err.println("Could not read MD5 of file: " + fileName);
-        }
-
-        return md5;
-    }
-
-    private String generateAndWriteMD5(String fileName) {
-        String md5 = null;
-        try (BufferedWriter fmd5 = this.clientFileManager.newBufferedWriter("." + fileName + ".md5")) {
-            md5 = this.clientFileManager.md5Checksum(fileName);
-            fmd5.write(md5);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return md5;
-    }
-
-    public void getToken(){
-        try(BufferedReader pw = clientFileManager.newBufferedReader("tokenFile")){
+    private void getToken() {
+        try (BufferedReader pw = clientFileManager.newBufferedReader("tokenFile")) {
             token = pw.readLine();
-        }catch(IOException e){} 
-    }
-
-    public void opensession(String userName, String password) throws RemoteException {
-        ServerResponse response = localServerStub.openSession(userName, password);
-        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
-        else{
-            token = (String)response.getData();
-            try(BufferedWriter pw = clientFileManager.newBufferedWriter("tokenFile")){
-                pw.write(token);
-            }catch(IOException e){} 
+        } catch (IOException e) {
         }
     }
 
-    public void send(String subject, String addrDest, String content) throws RemoteException {
-        ServerResponse response = localServerStub.sendEmail(addrDest, subject, content, token);
-        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
+    private void openSession(String userName, String password) throws RemoteException {
+        ServerResponse response = localServerStub.openSession(userName, password);
+        if (!response.isSuccessful()) {
+            System.err.println(response.getErrorMessage());
+        } else {
+            token = (String) response.getData();
+            try (BufferedWriter pw = clientFileManager.newBufferedWriter("tokenFile")) {
+                pw.write(token);
+            } catch (IOException e) {
+            }
+        }
     }
 
+    private void send(String subject, String addrDest, String content) throws RemoteException {
+        ServerResponse response = null;
+        if (this.groups.containsKey(addrDest)) {
+            /*
+                On envoie a tous les membres du groupes au niveau du client parce qu'il se peut que le
+                groupe existe sur le client et pas sur le serveur. Ou que les membres sont differents.
+             */
+            for (String to : this.groups.get(addrDest).getMembers()) {
+                response = localServerStub.sendEmail(to, subject, content, token);
+            }
+        } else {
+            response = localServerStub.sendEmail(addrDest, subject, content, token);
+        }
+        if (!response.isSuccessful()) {
+            System.err.println(response.getErrorMessage());
+        }
+    }
 
-    public void read() throws RemoteException {
+    private void read() throws RemoteException {
         ServerResponse<List<EmailMetadata>> list = localServerStub.listMails(false, token);
         if (!list.isSuccessful()) {
             System.err.println(list.getErrorMessage());
@@ -269,8 +260,7 @@ public class Client implements Runnable {
         System.out.println("\n" + data);
     }
 
-
-    public void delete() throws RemoteException {
+    private void delete() throws RemoteException {
         ServerResponse<List<EmailMetadata>> list = localServerStub.listMails(false, token);
         if (!list.isSuccessful()) {
             System.err.println(list.getErrorMessage());
@@ -288,80 +278,76 @@ public class Client implements Runnable {
         }
     }
 
-
-    public void search(String[] keywords) throws RemoteException {
+    private void search(String[] keywords) throws RemoteException {
         ServerResponse response = localServerStub.searchMail(keywords, token);
-        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
-        else{
+        if (!response.isSuccessful()) {
+            System.err.println(response.getErrorMessage());
+        } else {
             this.printEmailList((List<EmailMetadata>) response.getData(), false);
         }
     }
-	
-	public void list(boolean justUnread) throws RemoteException {
+
+    private void list(boolean justUnread) throws RemoteException {
         ServerResponse response = localServerStub.listMails(justUnread, token);
-        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
-        else{
+        if (!response.isSuccessful()) {
+            System.err.println(response.getErrorMessage());
+        } else {
             printEmailList((List<EmailMetadata>) response.getData(), false);
         }
     }
 
-    public void createGroup(String groupName) throws RemoteException {
+    private void createGroup(String groupName) {
         Group group = new Group(groupName);
-        this.groups.put(groupName,group);
-        writeGroupFiles();
+        this.groups.putIfAbsent(groupName, group);
+        writeGroupFile();
     }
 
-    public void getGroupFromLocalFile(){
-        try (BufferedReader reader = clientFileManager.newBufferedReader("groups");) {
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                String[] split = line.split(":");
-                Group g = new Group(split[0]);
+    private void joinGroup(String groupName, String user) {
 
-                for (String user : split[1].split(",")) {
-                    g.addMember(user);
-                }
-                this.groups.put(split[0], g);
-            }
-        } catch (IOException e) {
-            System.err.println("Impossible de lire le fichier ");
+        if (!this.groups.containsKey(groupName)) {
+            System.out.println("Le groupe `" + groupName + "' n'existe pas.");
+            return;
+        }
+
+        this.groups.get(groupName).addMember(user);
+        this.writeGroupFile();
+    }
+
+    private void publishGroupList() throws RemoteException {
+        List<Group> list = new ArrayList<>();
+        list.addAll(this.groups.values());
+
+        ServerResponse response = localServerStub.pushGroupList(list, token);
+        if (!response.isSuccessful()) {
+            System.err.println(response.getErrorMessage());
         }
     }
 
-    public void joinGroup(String groupName, String user) throws RemoteException {
-        try {
-            BufferedReader reader = clientFileManager.newBufferedReader("groups");
-            int lineNum = 0;
-            String line;
-            List<String> lines = new ArrayList<String>();
-            while ((line = reader.readLine()) != null) {
-                if(line.contains(groupName)) { 
-                    line = line + "," + user;
-                }
-                lines.add(line);
-            }
-            try(BufferedWriter pw = clientFileManager.newBufferedWriter("groups")){
-                for(int i = 0; i < lines.size();i++){
-                    pw.write(lines.get(i));
-                }
-            }catch(IOException e){}
-        } catch(Exception e) { 
-            System.out.println("Erreur");
-        }
-    }
-
-    public void publishGroupList() throws RemoteException {
-        getGroupFromLocalFile();
-        List<Group> groupList = new ArrayList<Group>(groups.values());
-        ServerResponse response = localServerStub.pushGroupList(groupList, token);
-        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
-    }
-
-
-    public void lockGroupList() throws RemoteException {
+    private void lockGroupList() throws RemoteException {
         ServerResponse response = localServerStub.lockGroupList(token);
-        if(!response.isSuccessful()){ System.err.println(response.getErrorMessage());}
-        else{ System.err.println((String)response.getData());}
+        if (!response.isSuccessful()) {
+            System.err.println(response.getErrorMessage());
+        } else {
+            System.err.println((String) response.getData());
+        }
+    }
+
+    private void getGroupList() throws RemoteException {
+        // Generer le MD5 du fichier des groupes
+        String md5 = this.clientFileManager.md5Checksum("groups");
+        // Envoyer la requete au serveur
+        ServerResponse<List<Group>> groupList = this.localServerStub.getGroupList(md5, token);
+        if (!groupList.isSuccessful()) {
+            System.out.println(groupList.getErrorMessage());
+            return;
+        }
+        // Ecraser les groupes existantes
+        this.groups = new HashMap<>();
+        for (Group g : groupList.getData()) {
+            this.groups.put(g.getName(), g);
+        }
+        // Ecrire la liste sur le fichier
+        this.writeGroupFile();
     }
 
     private int printEmailList(List<EmailMetadata> list, boolean ret) {
@@ -378,7 +364,7 @@ public class Client implements Runnable {
             if (!data.isRead()) nr++;
         }
 
-        System.out.println(index - 1 + "courriers dont " + nr + "non-lus.");
+        System.out.println(index - 1 + " courriers dont " + nr + " non-lus.");
         System.out.println(sb.toString());
 
         return index;
@@ -397,21 +383,34 @@ public class Client implements Runnable {
         return ret;
     }
 
-    private synchronized void writeGroupFiles() {
-        // <nom_du_groupe>:user1,user2,user3
+    private void writeGroupFile() {
+        if (this.clientFileManager.isReadable("groups")) {
+            try {
+                this.clientFileManager.deleteFile("groups");
+            } catch (IOException e) {
+            }
+        }
+        this.groups.forEach((String k, Group v) -> {
+            try {
+                this.clientFileManager.writeSerializeableObject("groups", v, StandardOpenOption.WRITE,
+                        StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
-        try (BufferedWriter bw = clientFileManager.newBufferedWriter("groups")) {
-            this.groups.forEach((String k, Group v) -> {
-                try {
-                    bw.write(v.toString());
-                    bw.newLine();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    private void getGroupFromLocalFile() {
+        try {
 
+            Collection<Object> objects = this.clientFileManager.readSerializeableObjects("groups");
+
+            objects.forEach((o) -> {
+                Group g = (Group) o;
+                this.groups.put(g.getName(), g);
             });
+
         } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
