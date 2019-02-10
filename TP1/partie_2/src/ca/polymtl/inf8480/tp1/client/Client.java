@@ -80,6 +80,10 @@ public class Client {
      * @param args String []
      */
     public void run(final String[] args) {
+        if (args.length == 0) {
+            Client.printUsage("Invalid command");
+            return;
+        }
         try {
             switch (args[0]) {
                 case "opensession":
