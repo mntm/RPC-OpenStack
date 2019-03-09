@@ -90,20 +90,26 @@ public class LoadBalancer implements ILoadBalancer {
     public ServerResponse<Integer> execute(Task task) throws RemoteException {
         ServerResponse<Integer> ret = new ServerResponse<>();
         // TODO handle failure (eg: if a server crashes)
-
-
         if (isSecure()) {
-
+            ret = secureExecution(task);
+        } else {
+            ret = insecureExecution(task);
         }
         return ret;
     }
 
-    private int secureExecution(Task task) {
-        return 0;
+    private ServerResponse<Integer> secureExecution(Task task) {
+        ServerResponse<Integer> ret = new ServerResponse<>();
+
+
+
+        return ret;
     }
 
-    private int insecureExecution(Task task) {
-        return 0;
+    private ServerResponse<Integer> insecureExecution(Task task) {
+        ServerResponse<Integer> ret = new ServerResponse<>();
+
+        return ret;
     }
 
     public boolean isSecure() {
@@ -112,6 +118,20 @@ public class LoadBalancer implements ILoadBalancer {
 
     public void setSecure(boolean secure) {
         this.secure = secure;
+    }
+
+    private class SecureExecutionThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+        }
+    }
+
+    private class NonSecureExecutionThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+        }
     }
 
     private class ServerInfoPullThread extends Thread {
