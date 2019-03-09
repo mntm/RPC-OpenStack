@@ -91,8 +91,7 @@ public class Server implements IServer {
         ns = (INameServer) RMIUtils.getStub(split[0], Integer.parseInt(split[1]), args[2]);
 
         try {
-            ServerResponse<Boolean> r = ns.addServer(info);
-            if (!r.isSuccessful()) System.out.println(r.getErrorMessage());
+            ns.addServer(info);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -103,10 +102,10 @@ public class Server implements IServer {
         ServerResponse<Boolean> ret = ns.isLegitLoadbalancer(l, p);
 
         try {
-            if (ret.isSuccessful())
+            if (ret.getData())
                 this.allowed.add(RemoteServer.getClientHost());
         } catch (ServerNotActiveException e) {
-            ret.setErrorMessage("Erreur lors de l'enregistrement.")
+            ret.setErrorMessage("Erreur lors de l'enregistrement: Impossible de recuperer l'adresse IP de l'appelant.")
                     .setData(false)
                     .setSuccessful(false);
         }

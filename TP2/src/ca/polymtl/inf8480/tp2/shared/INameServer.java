@@ -7,9 +7,9 @@ import java.util.List;
 public interface INameServer extends Remote {
     ServerResponse<List<ServerInfo>> getOnlineServers() throws RemoteException;
 
-    ServerResponse<Boolean> addServer(ServerInfo server) throws RemoteException;
+    void addServer(ServerInfo server) throws RemoteException;
 
-    ServerResponse<Boolean> addLoadbalancer(String name, String password) throws RemoteException;
+    void addLoadbalancer(String name, String password) throws RemoteException;
 
     ServerResponse<Boolean> isLegitLoadbalancer(String l, String p) throws RemoteException;
 }

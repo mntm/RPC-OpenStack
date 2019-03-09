@@ -75,10 +75,7 @@ public class LoadBalancer implements ILoadBalancer {
         ns = (INameServer) RMIUtils.getStub(split[0], Integer.parseInt(split[1]), args[3]);
 
         // Register to NS
-        ServerResponse<Boolean> reg = ns.addLoadbalancer(args[0], args[1]);
-        if (!reg.isSuccessful()) {
-            usage(reg.getErrorMessage());
-        }
+        ns.addLoadbalancer(args[0], args[1]);
 
         // Start a thread to get Server list from NS
         ServerInfoPullThread pull = new ServerInfoPullThread();
