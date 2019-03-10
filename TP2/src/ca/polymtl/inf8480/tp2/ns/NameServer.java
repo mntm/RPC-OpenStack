@@ -1,5 +1,6 @@
 package ca.polymtl.inf8480.tp2.ns;
 
+import ca.polymtl.inf8480.tp2.server.Server;
 import ca.polymtl.inf8480.tp2.shared.INameServer;
 import ca.polymtl.inf8480.tp2.shared.RMIUtils;
 import ca.polymtl.inf8480.tp2.shared.ServerInfo;
@@ -13,14 +14,14 @@ import java.util.Map;
 
 /**
  * Type: Serveur RMI
- * En tant que tel, s'enregistre sur le Registre RMI
- * <p>
- * Fourni au serveur un moyen de verifier l'integrite d'un distributeur de charge
- * <p>
- * Fourni aux distributeurs la liste des serveurs de calcul
+ *  En tant que tel, s'enregistre sur le Registre RMI
+ *
+ * Fourni au serveur un moyen de verifier l'integrite d'un repartiteur de charge
+ *
+ * Fourni aux repartiteurs la liste des serveurs de calcul
  */
 public class NameServer implements INameServer {
-    private List<ServerInfo> servers = new ArrayList<>();
+    private HashMap<Server, ServerInfo> servers = new HashMap<>();
     private Map<String, String> lbs = new HashMap<>();
 
     private static void usage(String message) {
@@ -42,18 +43,43 @@ public class NameServer implements INameServer {
     private void run(String[] args) {
         String[] split = args[1].split(":");
         RMIUtils.register(split[0], Integer.parseInt(split[1]), this, args[0]);
+
+        // Ping chaque serveur toutes les 5 secondes
+        Thread ping = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    for (Server s : servers.keySet()) {
+                        if (s == null) break;
+                        try {
+                            s.isAlive();
+                        } catch (RemoteException e) {
+                            servers.remove(s);
+                        }
+                    }
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+        ping.start();
     }
 
     @Override
     public ServerResponse<List<ServerInfo>> getOnlineServers() throws RemoteException {
         ServerResponse<List<ServerInfo>> ret = new ServerResponse<>();
-        ret.setData(this.servers);
+        ret.setData(new ArrayList<>(this.servers.values()));
         return ret;
     }
 
     @Override
-    public void addServer(ServerInfo server) throws RemoteException {
-        this.servers.add(server);
+    public synchronized void addServer(ServerInfo server) throws RemoteException {
+        Server s = (Server) RMIUtils.getStub(server.getIp(), server.getPort(), server.getName());
+        this.servers.put(s, server);
     }
 
     @Override

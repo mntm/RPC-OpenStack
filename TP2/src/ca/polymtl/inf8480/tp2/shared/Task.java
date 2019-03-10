@@ -9,6 +9,10 @@ public class Task implements Serializable {
     public Task() {
     }
 
+    public Task(ArrayList<TaskElement> operations) {
+        this.operations = operations;
+    }
+
     public void addOperation(TaskElement o) {
         this.operations.add(o);
     }

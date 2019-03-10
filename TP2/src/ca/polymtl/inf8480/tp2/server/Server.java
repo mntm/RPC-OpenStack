@@ -7,6 +7,7 @@ import java.rmi.server.RemoteServer;
 import java.rmi.server.ServerNotActiveException;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -15,15 +16,14 @@ import java.util.Random;
  * <p>
  * Contact le service de nom pour:
  * s'enregistrer
- * verifier qu'un distributeur de tache est legit
+ * verifier qu'un repartiteur de tache est legit
  */
 public class Server implements IServer {
-    private static final int FAULTY_RATE = 25;
-    private static final int MODULUS = 5000;
+
     private INameServer ns;
     private int capacity = 2;
     private int maxOpAllowed = 12;
-    private int currentOpCount = 0;
+    private AtomicInteger currentOpCount = new AtomicInteger(0);
     private boolean faulty = false;
     private int malicious_rate = 0;
     private ArrayList<String> allowed = new ArrayList<>();
@@ -61,7 +61,7 @@ public class Server implements IServer {
     private static void usage(String message) {
         System.out.println(message);
         System.out.println("server.sh <nom> <adress:port local> <nom repertoire> <adresse:port repertoire> [-m <taux de malice>] [-c capacite] [-f]");
-        System.out.println("\t-m\tpar defaut 0\n\t-c\tpar defaut 2\n\t-f\tle serveur a " + FAULTY_RATE + "% de chance de tomber");
+        System.out.println("\t-m\tpar defaut 0\n\t-c\tpar defaut 2\n\t-f\tle serveur a " + Const.FAULTY_RATE + "% de chance de tomber");
         System.exit(-1);
     }
 
@@ -126,29 +126,36 @@ public class Server implements IServer {
 
         if (!this.allowed.contains(client)) {
             return ret.setSuccessful(false)
-                    .setErrorMessage("Veuillez vous enregistrer aupres de ce serveur avant de soliciter ce service.");
+                    .setErrorMessage("Veuillez vous enregistrer aupres de ce serveur avant de soliciter ce service.").setData(Const.ERR_NOT_REGISTERED);
         }
 
         // check if we can handle the task
-        if ((this.currentOpCount + task.getSize()) >= this.maxOpAllowed)
-            return ret.setErrorMessage("Ce serveur ne peut prendre plus d'operation").setSuccessful(false);
+        if ((this.currentOpCount.getAndAdd(0) + task.getSize()) >= this.maxOpAllowed)
+            return ret.setErrorMessage("Ce serveur ne peut prendre plus d'operation").setSuccessful(false).setData(Const.ERR_CANNOT_HANDLE);
 
         if (RandomUtils.probability(task.getSize() - this.capacity, 5 * this.capacity))
-            return ret.setErrorMessage("Ce serveur ne peut prendre plus d'operation").setSuccessful(false);
+            return ret.setErrorMessage("Ce serveur ne peut prendre plus d'operation").setSuccessful(false).setData(Const.ERR_CANNOT_HANDLE);
 
-        this.currentOpCount += task.getSize();
+        this.currentOpCount.addAndGet(task.getSize());
 
         int data = 0;
 
         for (TaskElement el : task.getOperations()) {
-            if (this.isFaulty() && RandomUtils.probability(FAULTY_RATE))
+            if (this.isFaulty() && RandomUtils.probability(Const.FAULTY_RATE))
                 System.exit(-3);
 
-            data = (data + el.result()) % MODULUS;
-            this.currentOpCount--;
+            data = (data + el.result()) % Const.OP_MODULUS;
+            this.currentOpCount.decrementAndGet();
         }
 
         ret.setData(alterResult(data));
+        return ret;
+    }
+
+    @Override
+    public ServerResponse<Boolean> isAlive() throws RemoteException {
+        ServerResponse<Boolean> ret = new ServerResponse<>();
+        ret.setData(true);
         return ret;
     }
 
