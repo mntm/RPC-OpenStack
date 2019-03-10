@@ -19,23 +19,26 @@ public class ServerResponse<T> implements Serializable {
         return isSuccessful;
     }
 
-    public void setSuccessful(boolean successful) {
+    public ServerResponse<T> setSuccessful(boolean successful) {
         isSuccessful = successful;
+        return this;
     }
 
     public String getErrorMessage() {
         return errorMessage;
     }
 
-    public void setErrorMessage(String errorMessage) {
+    public ServerResponse<T> setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+        return this;
     }
 
     public T getData() {
         return data;
     }
 
-    public void setData(T data) {
+    public ServerResponse<T> setData(T data) {
         this.data = data;
+        return this;
     }
 }
