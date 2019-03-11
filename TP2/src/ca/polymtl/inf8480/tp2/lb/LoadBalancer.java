@@ -1,6 +1,6 @@
 package ca.polymtl.inf8480.tp2.lb;
 
-import ca.polymtl.inf8480.tp2.server.Server;
+
 import ca.polymtl.inf8480.tp2.shared.*;
 
 import java.rmi.RemoteException;
@@ -29,7 +29,7 @@ import java.util.function.Predicate;
  */
 public class LoadBalancer implements ILoadBalancer {
     private INameServer ns = null;
-    private ConcurrentMap<String, Map.Entry<Server, ServerInfo>> servers = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Map.Entry<IServer, ServerInfo>> servers = new ConcurrentHashMap<>();
     private String name;
     private String password;
     private boolean secure = true;
@@ -114,7 +114,7 @@ public class LoadBalancer implements ILoadBalancer {
 
         Queue<TaskElement> queue = new ConcurrentLinkedQueue<>(task.getOperations());
         Queue<AtomicInteger> results = new ConcurrentLinkedQueue<>();
-        Queue<Map.Entry<Server, ServerInfo>> nodes = new ConcurrentLinkedQueue<>(this.servers.values());
+        Queue<Map.Entry<IServer, ServerInfo>> nodes = new ConcurrentLinkedQueue<>(this.servers.values());
 
         ExecutorService pool = Executors.newFixedThreadPool(nodes.size());
         for (int i = 0; i < nodes.size(); i++) {
@@ -150,7 +150,7 @@ public class LoadBalancer implements ILoadBalancer {
     private ServerResponse<Integer> insecureExecution(Task task) {
         ServerResponse<Integer> ret = new ServerResponse<>();
 
-        Queue<Map.Entry<Server, ServerInfo>> nodes = new ConcurrentLinkedQueue<>(this.servers.values());
+        Queue<Map.Entry<IServer, ServerInfo>> nodes = new ConcurrentLinkedQueue<>(this.servers.values());
 
         int nServer = nodes.size();
 
@@ -174,9 +174,9 @@ public class LoadBalancer implements ILoadBalancer {
 
             int min = Integer.MAX_VALUE;
 
-            List<Map.Entry<Server, ServerInfo>> s = new ArrayList<>();
+            List<Map.Entry<IServer, ServerInfo>> s = new ArrayList<>();
             for (int j = 0; j < 3; j++) {
-                Map.Entry<Server, ServerInfo> poll = nodes.poll();
+                Map.Entry<IServer, ServerInfo> poll = nodes.poll();
                 min = Integer.min(min, poll.getValue().getCapacity());
                 s.add(poll);
             }
@@ -222,12 +222,12 @@ public class LoadBalancer implements ILoadBalancer {
     private class SecureExecutionWorker implements Runnable {
         private Queue<TaskElement> input;
         private Queue<AtomicInteger> output;
-        private Queue<Map.Entry<Server, ServerInfo>> nodes;
-        private Server server;
+        private Queue<Map.Entry<IServer, ServerInfo>> nodes;
+        private IServer server;
         private ServerInfo info;
 
 
-        SecureExecutionWorker(Queue<TaskElement> input, Queue<AtomicInteger> output, Queue<Map.Entry<Server, ServerInfo>> nodes) {
+        SecureExecutionWorker(Queue<TaskElement> input, Queue<AtomicInteger> output, Queue<Map.Entry<IServer, ServerInfo>> nodes) {
             this.input = input;
             this.output = output;
             this.nodes = nodes;
@@ -236,7 +236,7 @@ public class LoadBalancer implements ILoadBalancer {
         @Override
         public void run() {
             do { // S'arrete lorsqu'il n'y a plus de tache ou de serveur disponible
-                Map.Entry<Server, ServerInfo> node = nodes.poll();
+                Map.Entry<IServer, ServerInfo> node = nodes.poll();
                 if (node == null) {
                     System.out.println("Aucun serveur de disponible!");
                     break;
@@ -294,7 +294,7 @@ public class LoadBalancer implements ILoadBalancer {
 
         private final int threadGroup;
         private final int index;
-        private final List<Map.Entry<Server, ServerInfo>> servers;
+        private final List<Map.Entry<IServer, ServerInfo>> servers;
         private final int min;
         private final Task task;
         private ConcurrentHashMap<Integer, Integer> sharedBuff;
@@ -302,7 +302,7 @@ public class LoadBalancer implements ILoadBalancer {
 
         private boolean valid = false;
 
-        public NonSecureExecutionWorker(int threadGroup, final int index, final List<Map.Entry<Server, ServerInfo>> servers,
+        public NonSecureExecutionWorker(int threadGroup, final int index, final List<Map.Entry<IServer, ServerInfo>> servers,
                                         final int min, final Task task, ConcurrentHashMap<Integer, Integer> sharedBuff,
                                         AtomicIntegerArray results) {
 
@@ -409,6 +409,7 @@ public class LoadBalancer implements ILoadBalancer {
                 List<ServerInfo> serverInfos = new ArrayList<>();
                 if (ret.isSuccessful()) {
                     serverInfos = ret.getData();
+                    System.out.println("Nombre de serveur en ligne: " + serverInfos.size());
                 } else {
                     System.err.println(ret.getErrorMessage());
                     try {
@@ -421,7 +422,7 @@ public class LoadBalancer implements ILoadBalancer {
 
                 // register on each server
                 for (ServerInfo info : serverInfos) {
-                    Server s = (Server) RMIUtils.getStub(info.getIp(), info.getPort(), info.getName());
+                    IServer s = (IServer) RMIUtils.getStub(info.getIp(), info.getPort(), info.getName());
                     ServerResponse<Boolean> register = new ServerResponse<>();
                     try {
                         register = s.register(name, password);

@@ -4,8 +4,8 @@ pushd $(dirname $0) > /dev/null
 basepath=$(pwd)
 popd > /dev/null
 
-IPADDR=$(cut -f1 -d':' <<< $2)
-if [ -z "$2" ]
+IPADDR=$(cut -f1 -d':' <<< $4)
+if [ -z "$4" ]
   then
     IPADDR="127.0.0.1"
 fi

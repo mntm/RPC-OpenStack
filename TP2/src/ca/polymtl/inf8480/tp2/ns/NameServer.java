@@ -1,10 +1,6 @@
 package ca.polymtl.inf8480.tp2.ns;
 
-import ca.polymtl.inf8480.tp2.server.Server;
-import ca.polymtl.inf8480.tp2.shared.INameServer;
-import ca.polymtl.inf8480.tp2.shared.RMIUtils;
-import ca.polymtl.inf8480.tp2.shared.ServerInfo;
-import ca.polymtl.inf8480.tp2.shared.ServerResponse;
+import ca.polymtl.inf8480.tp2.shared.*;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -21,7 +17,7 @@ import java.util.Map;
  * Fourni aux repartiteurs la liste des serveurs de calcul
  */
 public class NameServer implements INameServer {
-    private HashMap<Server, ServerInfo> servers = new HashMap<>();
+    private HashMap<IServer, ServerInfo> servers = new HashMap<>();
     private Map<String, String> lbs = new HashMap<>();
 
     private static void usage(String message) {
@@ -49,12 +45,13 @@ public class NameServer implements INameServer {
             @Override
             public void run() {
                 while (true) {
-                    for (Server s : servers.keySet()) {
+                    for (IServer s : servers.keySet()) {
                         if (s == null) break;
                         try {
                             s.isAlive();
                         } catch (RemoteException e) {
                             servers.remove(s);
+                            System.out.println("Serveur supprime:" + s.toString());
                         }
                     }
                     try {
@@ -78,13 +75,15 @@ public class NameServer implements INameServer {
 
     @Override
     public synchronized void addServer(ServerInfo server) throws RemoteException {
-        Server s = (Server) RMIUtils.getStub(server.getIp(), server.getPort(), server.getName());
+        IServer s = (IServer) RMIUtils.getStub(server.getIp(), server.getPort(), server.getName());
         this.servers.put(s, server);
+        System.out.println("Serveur ajoute: " + server.getName());
     }
 
     @Override
     public void addLoadbalancer(String name, String password) throws RemoteException {
         this.lbs.put(name, password);
+        System.out.println("Repartiteur ajoute: " + name);
     }
 
     @Override
