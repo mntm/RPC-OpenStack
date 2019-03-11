@@ -86,6 +86,8 @@ public class Server implements IServer {
         String[] split = args[1].split(":");
         ServerInfo info = new ServerInfo(args[0], split[0], Integer.parseInt(split[1]), this.capacity);
 
+        RMIUtils.register(info.getIp(), info.getPort(), this, info.getName());
+
         // Get NS's stub
         split = args[3].split(":");
         ns = (INameServer) RMIUtils.getStub(split[0], Integer.parseInt(split[1]), args[2]);
