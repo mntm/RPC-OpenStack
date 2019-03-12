@@ -185,6 +185,7 @@ public class LoadBalancer implements ILoadBalancer {
 
 
         int from = 0;
+        ArrayList<AtomicBoolean> commonBreaks = new ArrayList<>();
         for (int i = 0; i < nPart; i++) {
             AtomicBoolean commonBreak = new AtomicBoolean(false);
             int to = ((from + nOps) < elements.size()) ? from + nOps : elements.size();
@@ -206,18 +207,26 @@ public class LoadBalancer implements ILoadBalancer {
                 pool.execute(new NonSecureExecutionWorker(i, j, s, min, t, sharedBuff, results, commonBreak));
             }
 
+            commonBreaks.add(commonBreak);
             from = to;
         }
 
         pool.shutdown();
 
+        boolean termination = false;
         try {
-            pool.awaitTermination(300, TimeUnit.SECONDS);
+            termination = pool.awaitTermination(300, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            return ret.setErrorMessage("La requete a pris trop de temps pour s'executer (>300s)").setSuccessful(false);
+            return ret.setErrorMessage("La requete a ete interrompu avant d'etre complete").setSuccessful(false);
         }
 
-        if (pool.isTerminated()) nodes.clear();
+        if (!termination) {
+            commonBreaks.forEach((v) -> {
+                v.set(true);
+            });
+            return ret.setErrorMessage("La requete a pris trop de temps pour s'executer (>300s)")
+                    .setSuccessful(false);
+        }
 
         int data = 0;
         for (int i = 0; i < nPart; i++) {
@@ -343,7 +352,7 @@ public class LoadBalancer implements ILoadBalancer {
                     ServerResponse<Integer> execute = new ServerResponse<>();
                     try {
                         execute = this.servers.get(index).getKey().execute(t);
-                    } catch (RemoteException e) {
+                    } catch (Exception e) {
                         execute.setSuccessful(false).setErrorMessage(e.getMessage());
                         StringBuilder sb = new StringBuilder();
                         sb.append("Thread Group: #").append(this.threadGroup);
@@ -458,7 +467,7 @@ public class LoadBalancer implements ILoadBalancer {
                     ServerResponse<Boolean> register = new ServerResponse<>();
                     try {
                         register = s.register(name, password);
-                    } catch (RemoteException e) {
+                    } catch (Exception e) {
                         register.setSuccessful(false).setErrorMessage(e.getMessage());
                     }
                     if (register.isSuccessful() && register.getData())

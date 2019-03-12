@@ -4,7 +4,7 @@ package ca.polymtl.inf8480.tp2.shared;
  * Created by marak on 19-03-12.
  */
 public class Debug {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     public static void print(String m) {
         if (DEBUG)

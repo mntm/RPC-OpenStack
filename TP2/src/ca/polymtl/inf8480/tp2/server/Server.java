@@ -55,7 +55,12 @@ public class Server implements IServer {
             }
         }
 
-        server.run(args);
+        try {
+            server.run(args);
+        } catch (Exception e) {
+            e.printStackTrace();
+            usage("");
+        }
     }
 
     private static void usage(String message) {
@@ -82,15 +87,17 @@ public class Server implements IServer {
         this.malicious_rate = rate;
     }
 
-    private void run(String[] args) {
+    private void run(String[] args) throws Exception {
         System.out.println("Parametres: ");
         StringBuilder sb = new StringBuilder();
 
         String[] split = args[1].split(":");
         ServerInfo info = new ServerInfo(args[0], split[0], Integer.parseInt(split[1]), this.capacity);
-        sb.append("NOM:").append(info.getName()).append("\t");
+        sb.append("\tNOM:").append(info.getName()).append("\t");
         sb.append("IP:").append(info.getIp()).append("\t");
         sb.append("PORT:").append(info.getPort()).append("\t");
+        sb.append("MALICE:").append(this.malicious_rate).append("%\t");
+        sb.append("DEFECTUEUX:").append(this.isFaulty() ? "OUI" : "NON").append("\t");
         sb.append("CAPACITE:").append(info.getCapacity()).append("\n");
 
         RMIUtils.register(info.getIp(), info.getPort(), this, info.getName());
@@ -100,16 +107,11 @@ public class Server implements IServer {
         // Get NS's stub
         split = args[3].split(":");
         ns = (INameServer) RMIUtils.getStub(split[0], Integer.parseInt(split[1]), args[2]);
-        sb.append("Repertoire de nom:").append("NOM:").append(args[2]).append("\tIP:")
+        sb.append("Repertoire de nom:\n").append("\tNOM:").append(args[2]).append("\tIP:")
                 .append(split[0]).append("\tPORT:").append(split[1]).append("\n");
 
         System.out.println(sb.toString());
-        try {
-            ns.addServer(info);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
+        ns.addServer(info);
 
     }
 
