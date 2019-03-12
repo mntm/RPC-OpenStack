@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Type: Serveur RMI
@@ -17,7 +18,7 @@ import java.util.Map;
  * Fourni aux repartiteurs la liste des serveurs de calcul
  */
 public class NameServer implements INameServer {
-    private HashMap<IServer, ServerInfo> servers = new HashMap<>();
+    private ConcurrentHashMap<IServer, ServerInfo> servers = new ConcurrentHashMap<>();
     private Map<String, String> lbs = new HashMap<>();
 
     private static void usage(String message) {
@@ -49,7 +50,7 @@ public class NameServer implements INameServer {
                         if (s == null) break;
                         try {
                             s.isAlive();
-                        } catch (RemoteException e) {
+                        } catch (Exception e) {
                             servers.remove(s);
                             System.out.println("Serveur supprime:" + s.toString());
                         }
@@ -59,6 +60,7 @@ public class NameServer implements INameServer {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    System.out.println("Nombre serveur: " + servers.size());
                 }
             }
         });
@@ -76,7 +78,9 @@ public class NameServer implements INameServer {
     @Override
     public synchronized void addServer(ServerInfo server) throws RemoteException {
         IServer s = (IServer) RMIUtils.getStub(server.getIp(), server.getPort(), server.getName());
+
         this.servers.put(s, server);
+
         System.out.println("Serveur ajoute: " + server.getName());
     }
 

@@ -40,7 +40,7 @@ public class Server implements IServer {
                     case "-m":
                         server.setMaliciousRate(Integer.parseInt(args[++i]));
                         break;
-                    case "-c":
+                    case "-q":
                         server.setCapacity(Integer.parseInt(args[++i]));
                         break;
                     case "-f":
@@ -60,8 +60,8 @@ public class Server implements IServer {
 
     private static void usage(String message) {
         System.out.println(message);
-        System.out.println("server.sh <nom> <adress:port local> <nom repertoire> <adresse:port repertoire> [-m <taux de malice>] [-c capacite] [-f]");
-        System.out.println("\t-m\tpar defaut 0\n\t-c\tpar defaut 2\n\t-f\tle serveur a " + Const.FAULTY_RATE + "% de chance de tomber");
+        System.out.println("server.sh <nom> <adress:port local> <nom repertoire> <adresse:port repertoire> [-m <taux de malice>] [-q capacite] [-f]");
+        System.out.println("\t-m\tpar defaut 0\n\t-q\tpar defaut 2\n\t-f\tle serveur a " + Const.FAULTY_RATE + "% de chance de tomber");
         System.exit(-1);
     }
 
@@ -88,9 +88,9 @@ public class Server implements IServer {
 
         String[] split = args[1].split(":");
         ServerInfo info = new ServerInfo(args[0], split[0], Integer.parseInt(split[1]), this.capacity);
-        sb.append("NOM:").append(info.getName());
-        sb.append("IP:").append(info.getIp());
-        sb.append("PORT:").append(info.getPort());
+        sb.append("NOM:").append(info.getName()).append("\t");
+        sb.append("IP:").append(info.getIp()).append("\t");
+        sb.append("PORT:").append(info.getPort()).append("\t");
         sb.append("CAPACITE:").append(info.getCapacity()).append("\n");
 
         RMIUtils.register(info.getIp(), info.getPort(), this, info.getName());

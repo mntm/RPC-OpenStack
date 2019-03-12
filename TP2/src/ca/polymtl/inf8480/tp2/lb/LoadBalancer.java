@@ -6,6 +6,7 @@ import ca.polymtl.inf8480.tp2.shared.*;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.function.Predicate;
@@ -84,6 +85,14 @@ public class LoadBalancer implements ILoadBalancer {
         pullServers.start();
     }
 
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
+    }
+
     @Override
     public ServerResponse<Integer> execute(Task task) throws RemoteException {
         ServerResponse<Integer> ret = new ServerResponse<>();
@@ -102,7 +111,8 @@ public class LoadBalancer implements ILoadBalancer {
 
     /**
      * Envoyer aux serveur le maximum d'operation qu'ils peuvent supporter,
-     * sans verifier le resultat.
+     * sans verifier le resultat. Les operations sont places dans une file que
+     * chaque thread d'execution partage.
      * <p>
      * Si est des serveur tombe, on tente de reprendre les operations destinee a ce serveur
      *
@@ -127,6 +137,7 @@ public class LoadBalancer implements ILoadBalancer {
         } catch (InterruptedException e) {
             return ret.setErrorMessage("La requete a pris trop de temps pour s'executer (>300s)").setSuccessful(false);
         }
+
         if (queue.size() > 0) {
             return ret.setErrorMessage("Une erreur s'est produite lors de l'execution de la requete").setSuccessful(false);
         }
@@ -148,11 +159,13 @@ public class LoadBalancer implements ILoadBalancer {
      * @return
      */
     private ServerResponse<Integer> insecureExecution(Task task) {
+        Debug.print("Execution insecure operation");
         ServerResponse<Integer> ret = new ServerResponse<>();
 
         Queue<Map.Entry<IServer, ServerInfo>> nodes = new ConcurrentLinkedQueue<>(this.servers.values());
 
         int nServer = nodes.size();
+        Debug.print("Nodes size: " + nServer);
 
         if ((nServer % 3) != 0) {
             return ret.setSuccessful(false)
@@ -162,28 +175,35 @@ public class LoadBalancer implements ILoadBalancer {
         int nPart = nServer / 3;
         int nOps = (int) Math.ceil(Math.ceil(task.getSize()) / nPart);
 
+        Debug.print("Number of part:" + String.valueOf(nPart));
+        Debug.print("Number of ops:" + String.valueOf(nOps));
+
         ArrayList<TaskElement> elements = task.getOperations();
         ExecutorService pool = Executors.newFixedThreadPool(nodes.size());
 
         AtomicIntegerArray results = new AtomicIntegerArray(nPart);
+
+
         int from = 0;
         for (int i = 0; i < nPart; i++) {
+            AtomicBoolean commonBreak = new AtomicBoolean(false);
             int to = ((from + nOps) < elements.size()) ? from + nOps : elements.size();
 
-            Task t = new Task((ArrayList<TaskElement>) elements.subList(from, to));
+            Task t = new Task(new ArrayList<>(elements.subList(from, to)));
 
             int min = Integer.MAX_VALUE;
 
             List<Map.Entry<IServer, ServerInfo>> s = new ArrayList<>();
             for (int j = 0; j < 3; j++) {
                 Map.Entry<IServer, ServerInfo> poll = nodes.poll();
+                Debug.print("Server #" + j + ": " + poll.getValue().getName());
                 min = Integer.min(min, poll.getValue().getCapacity());
                 s.add(poll);
             }
 
             ConcurrentHashMap<Integer, Integer> sharedBuff = new ConcurrentHashMap<>();
             for (int j = 0; j < 3; j++) {
-                pool.execute(new NonSecureExecutionWorker(i, j, s, min, t, sharedBuff, results));
+                pool.execute(new NonSecureExecutionWorker(i, j, s, min, t, sharedBuff, results, commonBreak));
             }
 
             from = to;
@@ -197,6 +217,8 @@ public class LoadBalancer implements ILoadBalancer {
             return ret.setErrorMessage("La requete a pris trop de temps pour s'executer (>300s)").setSuccessful(false);
         }
 
+        if (pool.isTerminated()) nodes.clear();
+
         int data = 0;
         for (int i = 0; i < nPart; i++) {
             int v = results.get(i);
@@ -209,14 +231,6 @@ public class LoadBalancer implements ILoadBalancer {
         }
 
         return ret.setData(data);
-    }
-
-    public boolean isSecure() {
-        return secure;
-    }
-
-    public void setSecure(boolean secure) {
-        this.secure = secure;
     }
 
     private class SecureExecutionWorker implements Runnable {
@@ -246,7 +260,6 @@ public class LoadBalancer implements ILoadBalancer {
                 this.info = node.getValue();
                 this.nodes.offer(node);
 
-
                 Task task = this.createTask();
                 if (task == null) break;
 
@@ -254,7 +267,7 @@ public class LoadBalancer implements ILoadBalancer {
 
                 try {
                     execute = this.server.execute(task);
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     execute.setSuccessful(false).setErrorMessage(e.getMessage());
                     this.nodes.remove(node);
                 }
@@ -262,11 +275,13 @@ public class LoadBalancer implements ILoadBalancer {
                 if (!execute.isSuccessful()) {
                     System.out.println(execute.getErrorMessage());
                     reinject(task);
-                    if (execute.getData() == Const.ERR_NOT_REGISTERED) this.nodes.remove(node);
+                    try {
+                        if (execute.getData() == Const.ERR_NOT_REGISTERED) this.nodes.remove(node);
+                    } catch (Exception e) {
+                    }
                 } else {
                     this.output.offer(new AtomicInteger(execute.getData()));
                 }
-
             } while (true);
         }
 
@@ -299,12 +314,13 @@ public class LoadBalancer implements ILoadBalancer {
         private final Task task;
         private ConcurrentHashMap<Integer, Integer> sharedBuff;
         private AtomicIntegerArray results;
+        private AtomicBoolean commonBreak;
 
         private boolean valid = false;
 
         public NonSecureExecutionWorker(int threadGroup, final int index, final List<Map.Entry<IServer, ServerInfo>> servers,
                                         final int min, final Task task, ConcurrentHashMap<Integer, Integer> sharedBuff,
-                                        AtomicIntegerArray results) {
+                                        AtomicIntegerArray results, AtomicBoolean commonBreak) {
 
             this.threadGroup = threadGroup;
             this.index = index;
@@ -313,6 +329,7 @@ public class LoadBalancer implements ILoadBalancer {
             this.task = task;
             this.sharedBuff = sharedBuff;
             this.results = results;
+            this.commonBreak = commonBreak;
         }
 
         @Override
@@ -335,7 +352,10 @@ public class LoadBalancer implements ILoadBalancer {
                         sb.append("address: ").append(this.servers.get(index).getValue().getIp()).append(";\t");
                         sb.append("est inaccessible.");
                         System.err.println(sb.toString());
+
                         this.results.set(this.threadGroup, Const.ERR_EXEC_ABORTED);
+
+                        this.commonBreak.set(true);
                         return;
                     }
 
@@ -344,7 +364,9 @@ public class LoadBalancer implements ILoadBalancer {
                     }
 
                     from += min;
+                    if (this.commonBreak.get()) return;
                 }
+                Debug.print(Thread.currentThread().getName() + " - data: " + data);
                 this.sharedBuff.put(index, data);
                 valid = verify(data);
             }
@@ -356,7 +378,7 @@ public class LoadBalancer implements ILoadBalancer {
             ArrayList<TaskElement> taskElements;
 
             try {
-                taskElements = (ArrayList<TaskElement>) this.task.getOperations().subList(from, to);
+                taskElements = new ArrayList<>(this.task.getOperations().subList(from, to));
             } catch (Exception e) {
                 return new Task();
             }
@@ -377,12 +399,17 @@ public class LoadBalancer implements ILoadBalancer {
             }
 
             for (Integer k : this.sharedBuff.keySet()) {
-                if (k == index) continue;
+                if (k == index) {
+                    Debug.print("Data from thread " + Thread.currentThread().getName() + " -- " +
+                            "TG:" + threadGroup + " index:" + index + ": " + this.sharedBuff.get(index));
+                    continue;
+                }
                 if (data.equals(this.sharedBuff.get(k))) ret = true;
             }
 
             if (ret) {
                 this.results.set(this.threadGroup, data);
+                commonBreak.set(true);
             }
 
             return ret;
@@ -409,7 +436,11 @@ public class LoadBalancer implements ILoadBalancer {
                 List<ServerInfo> serverInfos = new ArrayList<>();
                 if (ret.isSuccessful()) {
                     serverInfos = ret.getData();
-                    System.out.println("Nombre de serveur en ligne: " + serverInfos.size());
+                    System.out.print("Nombre de serveur en ligne: " + serverInfos.size() + " --");
+                    serverInfos.forEach((v) -> {
+                        System.out.print("\t" + v.getName());
+                    });
+                    System.out.println();
                 } else {
                     System.err.println(ret.getErrorMessage());
                     try {
@@ -421,6 +452,7 @@ public class LoadBalancer implements ILoadBalancer {
                 }
 
                 // register on each server
+                ConcurrentMap<String, Map.Entry<IServer, ServerInfo>> tmp = new ConcurrentHashMap<>();
                 for (ServerInfo info : serverInfos) {
                     IServer s = (IServer) RMIUtils.getStub(info.getIp(), info.getPort(), info.getName());
                     ServerResponse<Boolean> register = new ServerResponse<>();
@@ -430,8 +462,10 @@ public class LoadBalancer implements ILoadBalancer {
                         register.setSuccessful(false).setErrorMessage(e.getMessage());
                     }
                     if (register.isSuccessful() && register.getData())
-                        servers.put(info.getName(), new AbstractMap.SimpleEntry<>(s, info));
+                        tmp.put(info.getName(), new AbstractMap.SimpleEntry<>(s, info));
                 }
+
+                servers = tmp;
 
                 try {
                     Thread.sleep(5500);
