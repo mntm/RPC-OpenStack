@@ -152,7 +152,7 @@ public class LoadBalancer implements ILoadBalancer {
 
     /**
      * Envoyer le meme sous-ensemble de tache a un sous-ensemble de serveur.
-     *
+     * <p>
      * Si un des serveurs tombe, l'operation est annulee, le systeme renvoie un message d'erreur.
      *
      * @param task
@@ -370,9 +370,12 @@ public class LoadBalancer implements ILoadBalancer {
 
                     if (execute.isSuccessful()) {
                         data = (data + execute.getData()) % Const.OP_MODULUS;
+                        from += min;
+                    } else {
+                        System.out.println(this.servers.get(index).getValue().getName() + " - " + execute.getErrorMessage());
                     }
 
-                    from += min;
+
                     if (this.commonBreak.get()) return;
                 }
                 Debug.print(Thread.currentThread().getName() + " - data: " + data);

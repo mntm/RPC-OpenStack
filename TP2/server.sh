@@ -15,5 +15,5 @@ java -cp "$basepath"/server.jar:"$basepath"/shared.jar \
   -Djava.rmi.server.codebase=file:"$basepath"/shared.jar \
   -Djava.security.policy="$basepath"/policy \
   -Djava.rmi.server.hostname="$IPADDR" \
-  -Drmi.object.active-port="5027" \
+  -Drmi.object.active-port="5029" \
   ca.polymtl.inf8480.tp2.server.Server $*
