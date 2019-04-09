@@ -1,7 +1,7 @@
 heat_template_version: '2018-03-02'
 
 description: >
-Gabarit pour la partie “Déploiement d'un service Web sur une seule machine virtuelle” 
+    Gabarit pour la partie \“Déploiement d'un service Web sur une seule machine virtuelle\” 
 
 parameters:
   TheName:
@@ -10,6 +10,7 @@ parameters:
     
 resources:
   TheServer:
+    type: OS::Nova::Server
     properties:
       name: {get_param: TheName}
       availability_zone: nova
