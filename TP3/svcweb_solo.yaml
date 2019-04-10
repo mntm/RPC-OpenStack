@@ -2,30 +2,27 @@ heat_template_version: '2018-03-02'
 
 description: >
     Gabarit pour la partie \“Déploiement d'un service Web sur une seule machine virtuelle\” 
-
-parameters:
-  TheName:
-    type: string
-    description: Nom de l'instance
-    
+   
 resources:
   TheServer:
     type: OS::Nova::Server
     properties:
-      name: {get_param: TheName}
       availability_zone: nova
       flavor: 2048-10-1-1
       image: xenial-server-cloudimg-amd64-disk1
       key_name: vm
       networks:
       - {network: switch1-nat}
-      user_data:
+      user_data: |
         #!/usr/bin/env bash
-        
+
         apt-get -y update     
-        apt-get -y upgrade     
-        apt-get -y dist-upgrade     
-        apt-get -y autoremove     
-        apt-get -y install python
-     
+ 
+        apt-get -y install python2.7
+
+        wget https://raw.githubusercontent.com/houssemmh/INF8480-TP3/master/server.py
+
+        python2.7 server.py
+
+        EOF
 

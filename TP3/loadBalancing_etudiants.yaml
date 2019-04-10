@@ -1,0 +1,191 @@
+heat_template_version: '2018-03-02'
+
+description: A template to deploy a load balanced web server
+
+parameters:
+
+  image:
+    type: string
+    label: Image
+    description: Image utilisee pour les serveurs
+    default: xenial-server-cloudimg-amd64-disk1
+    constraints:
+    - custom_constraint: glance.image
+
+  flavor:
+    type: string
+    label: Flavor
+    description: Flavor utilisee par les serveurs
+    default: 2048-10-1-1
+    constraints:
+      - custom_constraint: nova.flavor
+
+  key_pair:
+    type: string
+    description: Paire de cle SSH que les instances vont utiliser
+    default: vm
+    constraints:
+      - custom_constraint: nova.keypair
+      
+  network:
+    type: string
+    label: Reseau
+    description: Reseau sur lequel les serveur seront lance
+    default: switch1-nat
+    constraints:
+      - custom_constraint: neutron.network
+      
+  extern_network:
+    type: string
+    label: reseau externe
+    default: externe1
+    description: Reseau qui sera associer a l'ip flotante
+    constraints:
+      - custom_constraint: neutron.network
+      
+  subnet_id:
+    type: string
+    label: Reseau du repartiteur
+    default: reseau-NAT-vers-VLAN289
+    constraints:
+      - custom_constraint: neutron.subnet
+   
+  lb_algo:
+    type: string
+    label: Algo de repartition
+    description: Algorithme de repartition des charges
+    default: ROUND_ROBIN
+    constraints:
+      - allowed_values: [ROUND_ROBIN, LEAST_CONNECTIONS, SOURCE_IP]
+    
+  pool_proto:
+    type: string
+    label: Protocole
+    description: Protocole pour le pool
+    default: HTTP
+    constraints: 
+      - allowed_values: [TCP, HTTP, HTTPS]
+      
+  proto_listener:
+    type: string
+    description: Protocol sur lequel ecouter le traffic
+    default: HTTP
+    constraints:
+      - allowed_values : [TCP, HTTP, HTTPS, TERMINATED_HTTPS]
+  
+  proto_port_listener:
+    type : number
+    description: Port sur lequel ecouter le traffic
+    default: 80
+    constraints:
+      - range: {min: 1, max: 65535}
+      
+  app_port:
+    type : number
+    description: Port sur lequel ecouter les serveurs ecoute
+    default: 8080
+    constraints:
+      - range: {min: 1, max: 65535}
+            
+  monitoring_type:
+    type: string
+    description: Type de surveillance
+    default: HTTP
+    constraints:
+      - allowed_values: [PING, TPC, HTTP, HTTPS]
+        
+resources:
+
+  nodes:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: 3
+      resource_def:
+        type: OS::Nova::Server
+        properties:
+          availability_zone: nova
+          name: web-%index%
+          flavor: {get_param: flavor}
+          image: {get_param: image}
+          key_name: {get_param: key_pair}
+          networks:
+          - {network: {get_param: network} }
+          user_data: |
+            #!/usr/bin/env bash
+
+            apt-get -y update
+            apt-get -y install python2.7
+
+            wget https://raw.githubusercontent.com/houssemmh/INF8480-TP3/master/server.py
+
+            python2.7 server.py
+
+            EOF
+            
+  floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: extern_network }
+      port_id: { get_attr: [myloadbalancer, vip_port_id ]}
+
+  myloadbalancer:
+    type: OS::Neutron::LBaaS::LoadBalancer
+    properties:
+      description: Repartiteur de charge
+      name: LoadBalancer
+      vip_subnet: {get_param: subnet_id}  
+
+  mylistener:
+    type: OS::Neutron::LBaaS::Listener
+    properties:
+      description: Defini le port sur lequel le repartiteur de charge ecoute
+      protocol: {get_param: proto_listener}
+      protocol_port: {get_param: proto_port_listener}
+      loadbalancer: {get_resource: myloadbalancer}
+      
+  mypool:
+    type: OS::Neutron::LBaaS::Pool
+    properties:
+      description: Maintien la liste des serveurs que le repartiteur de charge peut enquerir
+      lb_algorithm: {get_param: lb_algo}
+      protocol: {get_param: pool_proto}
+      listener: {get_resource: mylistener}
+      loadbalancer: {get_resource: myloadbalancer}
+      
+  pool_member1:
+    type: OS::Neutron::LBaaS::PoolMember
+    properties:
+      pool: { get_resource: mypool }
+      address: { get_attr: [ nodes,resource.0, first_address ]}
+      protocol_port: { get_param: app_port }
+      subnet: { get_param: subnet_id }
+
+  pool_member2:
+    type: OS::Neutron::LBaaS::PoolMember
+    properties:
+      pool: { get_resource: mypool }
+      address: { get_attr: [ nodes,resource.1, first_address ]}
+      protocol_port: { get_param: app_port }
+      subnet: { get_param: subnet_id }
+
+  pool_member3:
+    type: OS::Neutron::LBaaS::PoolMember
+    properties:
+      pool: { get_resource: mypool }
+      address: { get_attr: [ nodes,resource.2, first_address ]}
+      protocol_port: { get_param: app_port }
+      subnet: { get_param: subnet_id }
+            
+  mymonitor:
+    type: OS::Neutron::LBaaS::HealthMonitor
+    properties:
+      delay: 15000
+      max_retries: 2
+      pool: {get_resource: mypool}
+      timeout: 5000
+      type: {get_param: monitoring_type}
+      
+outputs:
+  pool_ip_address:
+    value: {get_attr: [mypool, show]}
+    description: The IP address of the load balancing pool
