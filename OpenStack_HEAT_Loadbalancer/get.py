@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
     Script that does n asynchronous request to a url. 
     Outputs the total and mean time of the execution
@@ -11,7 +11,8 @@ import time
 import sys
 import os
 
-cpu = os.cpu_count() + 1    # <---- NUMBER OF THREAD
+
+cpu = 3                     # <---- NUMBER OF THREAD
 n = 50                      # <---- NUMBER OF REQUEST
 
 def func_get(url):
